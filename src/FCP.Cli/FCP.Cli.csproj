@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 无界面验证与诊断工具 -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>FCP.Cli</RootNamespace>
+    <AssemblyName>fcp</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FCP.Core\FCP.Core.csproj" />
+    <ProjectReference Include="..\FCP.Engine.CmlLib\FCP.Engine.CmlLib.csproj" />
+    <ProjectReference Include="..\FCP.Platform.Windows\FCP.Platform.Windows.csproj" />
+  </ItemGroup>
+
+</Project>

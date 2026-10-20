@@ -1,0 +1,22 @@
+# PCL 参考资料：受《PCL 分发有限许可》约束，不得纳入本项目版本库
+/pcl/
+
+# .NET 构建产物
+bin/
+obj/
+artifacts/
+publish/
+*.user
+*.suo
+.vs/
+.idea/
+TestResults/
+*.binlog
+
+# 本地测试沙盒（真实游戏数据副本）
+/sandbox/
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+.DS_Store

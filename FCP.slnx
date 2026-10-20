@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FCP.App/FCP.App.csproj" />
+    <Project Path="src/FCP.Cli/FCP.Cli.csproj" />
+    <Project Path="src/FCP.Core/FCP.Core.csproj" />
+    <Project Path="src/FCP.Engine.CmlLib/FCP.Engine.CmlLib.csproj" />
+    <Project Path="src/FCP.Platform.Windows/FCP.Platform.Windows.csproj" />
+    <Project Path="src/FCP.UI/FCP.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FCP.Core.Tests/FCP.Core.Tests.csproj" />
+    <Project Path="tests/FCP.Engine.Tests/FCP.Engine.Tests.csproj" />
+  </Folder>
+</Solution>

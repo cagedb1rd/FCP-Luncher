@@ -1,0 +1,10 @@
+<UserControl x:Class="FCP.App.Views.PlaceholderPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Border Style="{StaticResource Fcp.Card}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="420" Padding="28,22">
+    <StackPanel>
+      <TextBlock Text="{Binding Title}" FontSize="{StaticResource FontSize.Hero}" Foreground="{StaticResource Brush.Brand}" HorizontalAlignment="Center" />
+      <TextBlock Text="{Binding Description}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,12,0,0" Foreground="{StaticResource Brush.TextSecondary}" />
+    </StackPanel>
+  </Border>
+</UserControl>

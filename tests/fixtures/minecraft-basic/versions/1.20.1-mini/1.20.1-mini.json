@@ -1,0 +1,42 @@
+{
+  "id": "1.20.1-mini",
+  "type": "release",
+  "mainClass": "net.minecraft.client.main.Main",
+  "releaseTime": "2023-06-12T13:25:51+00:00",
+  "time": "2023-06-12T13:25:51+00:00",
+  "assetIndex": { "id": "5", "sha1": "0000000000000000000000000000000000000000", "size": 1, "totalSize": 1, "url": "https://example.invalid/5.json" },
+  "assets": "5",
+  "javaVersion": { "component": "java-runtime-gamma", "majorVersion": 17 },
+  "arguments": {
+    "game": [
+      "--username", "${auth_player_name}",
+      "--version", "${version_name}",
+      "--gameDir", "${game_directory}",
+      "--assetsDir", "${assets_root}",
+      "--assetIndex", "${assets_index_name}",
+      "--uuid", "${auth_uuid}",
+      "--accessToken", "${auth_access_token}",
+      "--clientId", "${clientid}",
+      "--xuid", "${auth_xuid}",
+      "--userType", "${user_type}",
+      "--versionType", "${version_type}",
+      { "rules": [ { "action": "allow", "features": { "is_demo_user": true } } ], "value": "--demo" },
+      { "rules": [ { "action": "allow", "features": { "has_custom_resolution": true } } ], "value": [ "--width", "${resolution_width}", "--height", "${resolution_height}" ] },
+      { "rules": [ { "action": "allow", "features": { "is_quick_play_multiplayer": true } } ], "value": [ "--quickPlayMultiplayer", "${quickPlayMultiplayer}" ] }
+    ],
+    "jvm": [
+      { "rules": [ { "action": "allow", "os": { "name": "osx" } } ], "value": [ "-XstartOnFirstThread" ] },
+      { "rules": [ { "action": "allow", "os": { "name": "windows" } } ], "value": "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump" },
+      "-Djava.library.path=${natives_directory}",
+      "-Dminecraft.launcher.brand=${launcher_name}",
+      "-Dminecraft.launcher.version=${launcher_version}",
+      "-cp",
+      "${classpath}"
+    ]
+  },
+  "libraries": [
+    { "name": "com.example:alpha:1.0", "downloads": { "artifact": { "path": "com/example/alpha/1.0/alpha-1.0.jar", "sha1": "", "size": 0, "url": "" } } },
+    { "name": "com.example:shared:1.0", "downloads": { "artifact": { "path": "com/example/shared/1.0/shared-1.0.jar", "sha1": "", "size": 0, "url": "" } } },
+    { "name": "com.example:osxonly:1.0", "rules": [ { "action": "allow", "os": { "name": "osx" } } ], "downloads": { "artifact": { "path": "com/example/osxonly/1.0/osxonly-1.0.jar", "sha1": "", "size": 0, "url": "" } } }
+  ]
+}

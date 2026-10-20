@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      DOTNET_NOLOGO: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore FCP.slnx
+
+      - name: Build
+        run: dotnet build FCP.slnx -c Release --no-restore
+
+      - name: Test
+        run: dotnet test --solution FCP.slnx -c Release --no-build
+
+      - name: Publish (self-contained single file)
+        run: dotnet publish src/FCP.App -c Release -o artifacts/publish/app
+
+      # 启动冒烟测试：程序首帧渲染后把耗时写入文件并自动退出；启动时崩溃会写入 CRASH
+      - name: Startup smoke test
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP 'startup.txt'
+          $env:FCP_MEASURE_STARTUP = $out
+          $p = Start-Process artifacts/publish/app/FCP.exe -PassThru
+          if (-not $p.WaitForExit(60000)) { $p.Kill(); throw '启动超时（60 秒）' }
+          if (-not (Test-Path $out)) { throw "程序退出但没有写入启动结果，退出码 $($p.ExitCode)" }
+          $result = Get-Content $out -Raw
+          if ($result -match 'CRASH') { throw "启动时崩溃：$result" }
+          Write-Host "启动耗时：$result ms"
+          $size = (Get-Item artifacts/publish/app/FCP.exe).Length / 1MB
+          Write-Host ("单文件大小：{0:N1} MB" -f $size)
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: FCP-win-x64
+          path: artifacts/publish/app/FCP.exe

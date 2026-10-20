@@ -1,0 +1,16 @@
+{
+  "id": "测试版本 Ⅱ",
+  "inheritsFrom": "1.20.1-mini",
+  "type": "release",
+  "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+  "releaseTime": "2023-06-12T13:25:51+00:00",
+  "time": "2023-06-12T13:25:51+00:00",
+  "arguments": {
+    "game": [ "--launchTarget", "forgeclient", "--fml.mcVersion", "1.20.1" ],
+    "jvm": [ "-DlibraryDirectory=${library_directory}", "-DignoreList=client-extra,${version_name}.jar" ]
+  },
+  "libraries": [
+    { "name": "com.example:loader:1.0", "downloads": { "artifact": { "path": "com/example/loader/1.0/loader-1.0.jar", "sha1": "", "size": 0, "url": "" } } },
+    { "name": "com.example:shared:2.0", "downloads": { "artifact": { "path": "com/example/shared/2.0/shared-2.0.jar", "sha1": "", "size": 0, "url": "" } } }
+  ]
+}

@@ -1,0 +1,93 @@
+<UserControl x:Class="FCP.App.Views.InstanceSelectPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:FCP.App.ViewModels">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="230" />
+      <ColumnDefinition />
+    </Grid.ColumnDefinitions>
+
+    <!-- ===== 左栏：游戏文件夹 / 添加或导入 ===== -->
+    <Border Background="{StaticResource Brush.Sidebar}">
+      <StackPanel>
+        <TextBlock Text="游戏文件夹" Style="{StaticResource Fcp.Text.Section}" />
+        <ItemsControl ItemsSource="{Binding Folders}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type vm:FolderItem}">
+              <RadioButton Style="{StaticResource Fcp.ListItem}" GroupName="Folders" Tag="{StaticResource Icon.Folder}"
+                           Command="{Binding DataContext.SelectFolderCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                           CommandParameter="{Binding}" ToolTip="{Binding Path}" Loaded="FolderItem_Loaded">
+                <StackPanel>
+                  <TextBlock Text="{Binding Name}" />
+                  <TextBlock Text="{Binding Path}" Style="{StaticResource Fcp.Text.Caption}" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
+                </StackPanel>
+              </RadioButton>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock Text="添加或导入" Style="{StaticResource Fcp.Text.Section}" />
+        <Button Style="{StaticResource Fcp.RowButton}" Margin="6,1" Padding="12,9" Command="{Binding AddFolderCommand}">
+          <StackPanel Orientation="Horizontal">
+            <Path Data="{StaticResource Icon.AddCircle}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.TextSecondary}" Margin="0,0,10,0" />
+            <TextBlock Text="添加已有文件夹" />
+          </StackPanel>
+        </Button>
+        <Button Style="{StaticResource Fcp.RowButton}" Margin="6,1" Padding="12,9" Command="{Binding AddFolderCommand}">
+          <StackPanel Orientation="Horizontal">
+            <Path Data="{StaticResource Icon.Search}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.TextSecondary}" Margin="0,0,10,0" />
+            <TextBlock Text="找不到游戏？全盘查找" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Border>
+
+    <!-- ===== 右栏：搜索 + 分组版本卡片 ===== -->
+    <Grid Grid.Column="1" Margin="22,18,22,0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition />
+      </Grid.RowDefinitions>
+      <TextBox Style="{StaticResource Fcp.SearchBox}" Tag="搜索版本" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+        <ItemsControl ItemsSource="{Binding Groups}" Margin="0,0,0,20">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type vm:InstanceGroup}">
+              <Border Style="{StaticResource Fcp.Card}" Margin="0,0,0,12" Padding="10,12">
+                <StackPanel>
+                  <TextBlock Text="{Binding Title}" Style="{StaticResource Fcp.Text.CardTitle}" Margin="8,0,0,6" />
+                  <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="{x:Type vm:InstanceSummary}">
+                        <Button Style="{StaticResource Fcp.RowButton}"
+                                Command="{Binding DataContext.SelectInstanceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}">
+                          <Grid>
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="Auto" />
+                              <ColumnDefinition />
+                              <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="32" Height="32" CornerRadius="6" Background="{StaticResource Brush.BrandSoft}">
+                              <Path Data="{StaticResource Icon.Box}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                              <TextBlock Text="{Binding Info}" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <Path Grid.Column="2" Data="{StaticResource Icon.Star}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.TextTertiary}" ToolTip="收藏" />
+                          </Grid>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Grid>
+  </Grid>
+</UserControl>
