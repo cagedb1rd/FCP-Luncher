@@ -14,12 +14,14 @@ namespace FCP.App;
 public partial class MainWindow : Window
 {
     private readonly ShellViewModel _shell;
+    private readonly string? _launchTarget;
     private readonly string? _snapshotDirectory = Environment.GetEnvironmentVariable("FCP_SNAPSHOT_DIR");
 
-    public MainWindow()
+    public MainWindow(IServiceProvider services, string? launchTarget)
     {
         InitializeComponent();
-        _shell = new ShellViewModel();
+        _launchTarget = launchTarget;
+        _shell = new ShellViewModel(services);
         DataContext = _shell;
         _shell.PropertyChanged += OnShellPropertyChanged;
         SourceInitialized += (_, _) => WindowEffects.TryEnableRoundedCorners(this);
@@ -64,6 +66,15 @@ public partial class MainWindow : Window
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (_shell.Dialog is { } dialog)
+        {
+            if (e.Key == Key.Escape)
+            {
+                dialog.Dismiss();
+                e.Handled = true;
+            }
+            return;
+        }
         if (e.Key == Key.Escape && _shell.IsSubPage)
         {
             _shell.BackCommand.Execute(null);
@@ -72,6 +83,11 @@ public partial class MainWindow : Window
         else if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control && _shell.CurrentPage is LaunchPageViewModel launch)
         {
             launch.LaunchCommand.Execute(null);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.F11 && _shell.CurrentPage is InstanceSelectViewModel select)
+        {
+            select.ShowHidden = !select.ShowHidden;
             e.Handled = true;
         }
     }
@@ -86,13 +102,26 @@ public partial class MainWindow : Window
             Application.Current.Shutdown();
             return;
         }
+
+        await _shell.InitializeAsync();
+
         if (!string.IsNullOrEmpty(_snapshotDirectory))
+        {
             await RunSnapshotTourAsync(_snapshotDirectory);
+            return;
+        }
+        if (!string.IsNullOrEmpty(_launchTarget))
+        {
+            if (await _shell.State.SelectByVersionDirectoryAsync(_launchTarget))
+                await _shell.Launch.LaunchCommand.ExecuteAsync(null);
+            else
+                _shell.ShowHint($"找不到快捷方式指向的版本：{_launchTarget}", HintKind.Error);
+        }
     }
 
     /// <summary>
     /// 截图模式（FCP_SNAPSHOT_DIR）：依次打开各个页面，用 RenderTargetBitmap 直接渲染界面并保存为 PNG。
-    /// 不截取屏幕，因此不受其他窗口遮挡影响，也不会拍到用户屏幕上的其他内容。
+    /// 不截取屏幕，因此不受其他窗口遮挡影响，也不会拍到用户屏幕上的其他内容；也不会真的启动游戏。
     /// </summary>
     private async Task RunSnapshotTourAsync(string directory)
     {
@@ -110,14 +139,54 @@ public partial class MainWindow : Window
         _shell.SelectedTab = MainTab.Settings;
         await Task.Delay(settle);
         SaveSnapshot(directory, "03-settings");
+        _shell.Settings.Section = SettingsSection.Download;
+        await Task.Delay(TimeSpan.FromMilliseconds(600));
+        SaveSnapshot(directory, "03b-settings-download");
+        _shell.Settings.Section = SettingsSection.Other;
+        await Task.Delay(TimeSpan.FromMilliseconds(600));
+        SaveSnapshot(directory, "03c-settings-other");
+        _shell.Settings.Section = SettingsSection.Launch;
 
         _shell.SelectedTab = MainTab.Launch;
         await Task.Delay(TimeSpan.FromMilliseconds(600));
-        _shell.Launch.LaunchCommand.Execute(null);
-        await Task.Delay(TimeSpan.FromMilliseconds(1100));
+        _shell.Launch.ShowLaunchingPreview();
+        await Task.Delay(TimeSpan.FromMilliseconds(800));
         SaveSnapshot(directory, "04-launching");
-        await Task.Delay(TimeSpan.FromMilliseconds(1900));
-        SaveSnapshot(directory, "05-launched");
+        _shell.Launch.ShowLaunchingPreview(stop: true);
+
+        var accountDialog = new AccountDialogViewModel(_shell.State);
+        _ = _shell.ShowDialogAsync(accountDialog);
+        await Task.Delay(TimeSpan.FromMilliseconds(700));
+        SaveSnapshot(directory, "05-account-dialog");
+        accountDialog.CancelCommand.Execute(null);
+
+        if (_shell.Launch.ShowMigrationDetailsCommand.CanExecute(null) && _shell.State.PclImport is not null)
+        {
+            _ = _shell.Launch.ShowMigrationDetailsCommand.ExecuteAsync(null);
+            await Task.Delay(TimeSpan.FromMilliseconds(700));
+            SaveSnapshot(directory, "05b-migration-details");
+            _shell.Dialog?.Dismiss();
+        }
+
+        if (_shell.State.SelectedInstance is { } instance)
+        {
+            _shell.OpenInstanceSettings(instance);
+            await Task.Delay(TimeSpan.FromMilliseconds(1200));
+            SaveSnapshot(directory, "07-instance-overview");
+            if (_shell.CurrentPage is InstanceSettingsViewModel page)
+            {
+                page.Section = InstanceSection.Settings;
+                await Task.Delay(TimeSpan.FromMilliseconds(600));
+                SaveSnapshot(directory, "07b-instance-settings");
+                page.Section = InstanceSection.Mods;
+                await Task.Delay(TimeSpan.FromMilliseconds(4000));
+                SaveSnapshot(directory, "07c-instance-mods");
+                page.Section = InstanceSection.Saves;
+                await Task.Delay(TimeSpan.FromMilliseconds(800));
+                SaveSnapshot(directory, "07d-instance-saves");
+            }
+            _shell.BackCommand.Execute(null);
+        }
 
         _shell.SelectedTab = MainTab.More;
         await Task.Delay(settle);

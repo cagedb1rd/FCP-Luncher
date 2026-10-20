@@ -31,6 +31,7 @@
     <ProjectReference Include="..\FCP.Core\FCP.Core.csproj" />
     <ProjectReference Include="..\FCP.Engine.CmlLib\FCP.Engine.CmlLib.csproj" />
     <ProjectReference Include="..\FCP.Platform.Windows\FCP.Platform.Windows.csproj" />
+    <ProjectReference Include="..\FCP.Hosting\FCP.Hosting.csproj" />
     <ProjectReference Include="..\FCP.UI\FCP.UI.csproj" />
   </ItemGroup>
 

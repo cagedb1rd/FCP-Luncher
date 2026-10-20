@@ -1,0 +1,86 @@
+<UserControl x:Class="FCP.App.Views.AccountDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:FCP.UI.Controls;assembly=FCP.UI"
+             xmlns:vm="clr-namespace:FCP.App.ViewModels">
+  <Border Width="440" Background="{StaticResource Brush.CardSolid}" CornerRadius="14" Padding="24,22,24,20"
+          Effect="{StaticResource Shadow.Elevated}" ui:Motion.Entrance="True">
+    <StackPanel>
+      <StackPanel Orientation="Horizontal">
+        <Border Style="{StaticResource Fcp.IconTile}">
+          <Path Data="{StaticResource Icon.Person}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
+        </Border>
+        <TextBlock Text="账号" FontSize="{StaticResource FontSize.Title}" FontWeight="Bold" VerticalAlignment="Center" Margin="12,0,0,0" />
+      </StackPanel>
+
+      <!-- 已有账号：点击切换 -->
+      <StackPanel Visibility="{Binding HasAccounts, Converter={StaticResource BoolToVisibility}}">
+        <TextBlock Text="点击切换账号" Style="{StaticResource Fcp.Text.Caption}" Margin="2,14,0,6" />
+        <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Accounts}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type vm:AccountRow}">
+                <Button x:Name="Row" Style="{StaticResource Fcp.RowButton}" Padding="8,6" Margin="0,1"
+                        Command="{Binding DataContext.SelectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:PixelAvatar PlayerName="{Binding PlayerName}" Width="34" Height="34" CornerRadius="7" />
+                    <StackPanel Grid.Column="1" Margin="11,0" VerticalAlignment="Center">
+                      <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding PlayerName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                        <ui:Chip x:Name="CurrentChip" Content="当前" Tone="Brand" Margin="8,0,0,0" Visibility="Collapsed" />
+                      </StackPanel>
+                      <TextBlock Text="{Binding KindText}" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="2" Style="{StaticResource Fcp.RowButton}" Padding="6" ToolTip="删除这个账号（不影响游戏存档）"
+                            Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                      <Path Data="{StaticResource Icon.Dismiss}" Style="{StaticResource Fcp.Icon}" Width="12" Height="12" Fill="{StaticResource Brush.TextTertiary}" />
+                    </Button>
+                  </Grid>
+                </Button>
+                <DataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter TargetName="CurrentChip" Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </DataTemplate.Triggers>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+        <Border Height="1" Background="{StaticResource Brush.Border}" Margin="0,12,0,0" />
+      </StackPanel>
+
+      <!-- 添加离线账号 -->
+      <TextBlock Text="添加离线账号" FontWeight="SemiBold" Margin="2,14,0,8" />
+      <TextBox x:Name="NameBox" Style="{StaticResource Fcp.TextBox}" Tag="玩家名（字母、数字、下划线，最多 16 个字符）"
+               Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}" MaxLength="16">
+        <TextBox.InputBindings>
+          <KeyBinding Key="Enter" Command="{Binding AddCommand}" />
+        </TextBox.InputBindings>
+      </TextBox>
+      <TextBlock Text="{Binding NameError}" Foreground="{StaticResource Brush.Danger}" FontSize="{StaticResource FontSize.Caption}" Margin="2,6,0,0"
+                 Visibility="{Binding NameError, Converter={StaticResource NullToCollapsed}}" />
+      <Grid Margin="2,12,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel>
+          <TextBlock Text="与 PCL 使用相同的 UUID" />
+          <TextBlock Text="从 PCL 换过来时请保持开启，单人存档中的物品和进度才能对上" Style="{StaticResource Fcp.Text.Caption}" TextWrapping="Wrap" Margin="0,3,12,0" />
+        </StackPanel>
+        <CheckBox Grid.Column="1" Style="{StaticResource Fcp.Toggle}" IsChecked="{Binding UsePclUuid}" VerticalAlignment="Center" />
+      </Grid>
+      <TextBlock Text="微软正版登录和第三方登录（如 LittleSkin）将在下一个版本推出。" Style="{StaticResource Fcp.Text.Caption}" TextWrapping="Wrap" Margin="2,14,0,0" />
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+        <Button Style="{StaticResource Fcp.Button}" Content="取消" MinWidth="96" Command="{Binding CancelCommand}" />
+        <Button Style="{StaticResource Fcp.PrimaryButton}" Content="添加并使用" Tag="{StaticResource Icon.AddCircle}" MinWidth="120" Margin="8,0,0,0" Command="{Binding AddCommand}" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>

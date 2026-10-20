@@ -69,8 +69,8 @@ public static class LaunchProcessFactory
 
     private static Encoding AnsiEncoding()
     {
-        var codePage = CultureInfo.CurrentCulture.TextInfo.ANSICodePage;
-        return Encoding.GetEncoding(codePage, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+        // Java 按系统的 ANSI 代码页（native.encoding）读取 @argfile，而不是界面语言对应的代码页
+        return Encoding.GetEncoding(GameOutputDecoder.SystemAnsi.CodePage, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
     }
 
     private static bool CanEncode(Encoding encoding, string text)

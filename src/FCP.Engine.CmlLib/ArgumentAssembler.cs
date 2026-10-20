@@ -212,7 +212,7 @@ internal sealed partial class ArgumentAssembler
             yield return $"-Xmx{_request.MaxMemoryMb}m";
 
         // GC：用户没有自行指定时，使用官方启动器默认的 G1 参数（P1 起由 GC 策略设置决定）
-        if (!userArgs.Any(a => GcFlagRegex().IsMatch(a)))
+        if (_request.AddDefaultGcArguments && !userArgs.Any(a => GcFlagRegex().IsMatch(a)))
         {
             yield return "-XX:+UnlockExperimentalVMOptions";
             yield return "-XX:+UseG1GC";

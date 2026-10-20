@@ -88,6 +88,9 @@ public sealed record LaunchRequest
     /// </summary>
     public bool UseMojangLogConfiguration { get; init; }
 
+    /// <summary>用户没有在 JVM 参数中指定 GC 时，是否添加默认的 G1 参数（GC 策略为“不指定”时为 false）。</summary>
+    public bool AddDefaultGcArguments { get; init; } = true;
+
     public string LauncherName { get; init; } = "FCP";
     public string LauncherVersion { get; init; } = "0";
 }
@@ -113,8 +116,12 @@ public sealed record FileRepairProgress(string Stage, int CompletedFiles, int To
 /// </summary>
 public interface ILaunchEngine
 {
-    /// <summary>校验并补全 libraries / assets / 客户端 jar。</summary>
-    Task VerifyAndRepairFilesAsync(GameInstanceLocation instance, IProgress<FileRepairProgress>? progress, CancellationToken cancellationToken);
+    /// <summary>
+    /// 校验并补全 libraries / assets / 客户端 jar。
+    /// <paramref name="fullCheck"/> 为 false 时只检查文件是否存在、大小是否正确（每次启动用，快）；
+    /// 为 true 时计算 SHA-1（“补全文件”功能用，慢）。
+    /// </summary>
+    Task VerifyAndRepairFilesAsync(GameInstanceLocation instance, bool fullCheck, IProgress<FileRepairProgress>? progress, CancellationToken cancellationToken);
 
     /// <summary>构建启动计划（不启动进程）。</summary>
     Task<LaunchPlan> BuildLaunchPlanAsync(LaunchRequest request, CancellationToken cancellationToken);

@@ -1,0 +1,257 @@
+<UserControl x:Class="FCP.App.Views.InstanceSettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:FCP.UI.Controls;assembly=FCP.UI"
+             xmlns:vm="clr-namespace:FCP.App.ViewModels">
+  <UserControl.Resources>
+    <!-- “名称：值（说明）”一行 -->
+    <DataTemplate x:Key="InfoRowTemplate" DataType="{x:Type vm:InfoRow}">
+      <Grid Margin="2,0,0,12">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="110" />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding Label}" Foreground="{StaticResource Brush.TextSecondary}" />
+        <StackPanel Grid.Column="1">
+          <TextBlock Text="{Binding Value}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding Hint}" Style="{StaticResource Fcp.Text.Caption}" TextWrapping="Wrap" Margin="0,3,0,0"
+                     Visibility="{Binding Hint, Converter={StaticResource NullToCollapsed}}" />
+        </StackPanel>
+      </Grid>
+    </DataTemplate>
+
+    <!-- 存档 / 资源包 / 光影的一行 -->
+    <DataTemplate x:Key="ContentItemTemplate" DataType="{x:Type vm:ContentItem}">
+      <Button Style="{StaticResource Fcp.RowButton}" Padding="8,7" Margin="0,1" ToolTip="{Binding Path}"
+              Command="{Binding DataContext.OpenItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+          </Grid.ColumnDefinitions>
+          <Border Width="36" Height="36" CornerRadius="6" Background="{StaticResource Brush.BrandSoft}" ClipToBounds="True">
+            <Grid>
+              <Path Data="{StaticResource Icon.Folder}" Style="{StaticResource Fcp.Icon}" Width="16" Height="16" Fill="{StaticResource Brush.Brand}" />
+              <Image Source="{Binding IconPath, Converter={StaticResource PathToImage}}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+            </Grid>
+          </Border>
+          <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+            <TextBlock Text="{Binding Detail}" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+          </StackPanel>
+        </Grid>
+      </Button>
+    </DataTemplate>
+
+    <!-- 不带选中效果的列表项（Mod 列表使用 ListBox 只是为了虚拟化） -->
+    <Style x:Key="PlainListItem" TargetType="ListBoxItem">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ListBoxItem">
+            <ContentPresenter />
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="Focusable" Value="False" />
+    </Style>
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="180" />
+      <ColumnDefinition />
+    </Grid.ColumnDefinitions>
+
+    <!-- 左侧分页：与 PCL 相同的顺序 -->
+    <Border Background="{StaticResource Brush.Sidebar}" BorderBrush="#80FFFFFF" BorderThickness="0,0,1,0">
+      <StackPanel Margin="0,12,0,0">
+        <RadioButton Style="{StaticResource Fcp.ListItem}" Content="概览" Tag="{StaticResource Icon.Info}"
+                     IsChecked="{Binding Section, Converter={StaticResource EnumEquals}, ConverterParameter=Overview}" />
+        <RadioButton Style="{StaticResource Fcp.ListItem}" Content="设置" Tag="{StaticResource Icon.Settings}"
+                     IsChecked="{Binding Section, Converter={StaticResource EnumEquals}, ConverterParameter=Settings}" />
+        <RadioButton Style="{StaticResource Fcp.ListItem}" Content="Mod" Tag="{StaticResource Icon.Puzzle}"
+                     IsChecked="{Binding Section, Converter={StaticResource EnumEquals}, ConverterParameter=Mods}" />
+        <RadioButton Style="{StaticResource Fcp.ListItem}" Content="资源包" Tag="{StaticResource Icon.Image}"
+                     IsChecked="{Binding Section, Converter={StaticResource EnumEquals}, ConverterParameter=ResourcePacks}" />
+        <RadioButton Style="{StaticResource Fcp.ListItem}" Content="光影" Tag="{StaticResource Icon.Sparkle}"
+                     IsChecked="{Binding Section, Converter={StaticResource EnumEquals}, ConverterParameter=Shaders}" />
+        <RadioButton Style="{StaticResource Fcp.ListItem}" Content="存档" Tag="{StaticResource Icon.Globe}"
+                     IsChecked="{Binding Section, Converter={StaticResource EnumEquals}, ConverterParameter=Saves}" />
+      </StackPanel>
+    </Border>
+
+    <!-- ===================== 概览 ===================== -->
+    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Visibility="{Binding IsOverview, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel Margin="22,18,22,22">
+        <Border Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ui:BlockIcon Kind="{Binding Item.Kind}" Width="48" Height="48" />
+            <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="{Binding Item.Name}" FontSize="{StaticResource FontSize.Title}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+              <WrapPanel Margin="0,6,0,0">
+                <ui:Chip Content="{Binding Item.McVersion}" Tone="Sky" Margin="0,0,5,0" />
+                <ui:Chip Content="{Binding Item.Loader}" Tone="Amber" Margin="0,0,5,0" Visibility="{Binding Item.Loader, Converter={StaticResource NullToCollapsed}}" />
+                <ui:Chip Content="{Binding Item.ModCountText}" Tone="Purple" Margin="0,0,5,0" />
+                <ui:Chip Content="{Binding Item.Account}" Tone="Brand" Visibility="{Binding Item.Account, Converter={StaticResource NullToCollapsed}}" />
+              </WrapPanel>
+            </StackPanel>
+            <Button Grid.Column="2" Style="{StaticResource Fcp.RowButton}" Padding="8" VerticalAlignment="Top" Command="{Binding ToggleFavoriteCommand}">
+              <Path Width="20" Height="20">
+                <Path.Style>
+                  <Style TargetType="Path" BasedOn="{StaticResource Fcp.Icon}">
+                    <Setter Property="Data" Value="{StaticResource Icon.Star}" />
+                    <Setter Property="Fill" Value="{StaticResource Brush.TextTertiary}" />
+                    <Setter Property="ToolTip" Value="收藏" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                        <Setter Property="Data" Value="{StaticResource Icon.StarFilled}" />
+                        <Setter Property="Fill" Value="{StaticResource Brush.Amber}" />
+                        <Setter Property="ToolTip" Value="取消收藏" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Path.Style>
+              </Path>
+            </Button>
+          </Grid>
+        </Border>
+
+        <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="60">
+          <StackPanel>
+            <TextBlock Text="这个版本的信息" Style="{StaticResource Fcp.Text.CardTitle}" Margin="0,0,0,12" />
+            <ItemsControl ItemsSource="{Binding Overview}" ItemTemplate="{StaticResource InfoRowTemplate}" />
+          </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="120">
+          <StackPanel>
+            <TextBlock Text="快捷打开" Style="{StaticResource Fcp.Text.CardTitle}" Margin="0,0,0,12" />
+            <WrapPanel>
+              <Button Style="{StaticResource Fcp.Button}" Content="版本文件夹" Tag="{StaticResource Icon.Folder}" Height="32" Margin="0,0,8,8" Command="{Binding OpenFolderCommand}" CommandParameter="version" />
+              <Button Style="{StaticResource Fcp.Button}" Content="游戏目录" Tag="{StaticResource Icon.Folder}" Height="32" Margin="0,0,8,8" Command="{Binding OpenFolderCommand}" CommandParameter="game" />
+              <Button Style="{StaticResource Fcp.Button}" Content="存档" Tag="{StaticResource Icon.Globe}" Height="32" Margin="0,0,8,8" Command="{Binding OpenFolderCommand}" CommandParameter="saves" />
+              <Button Style="{StaticResource Fcp.Button}" Content="Mod" Tag="{StaticResource Icon.Puzzle}" Height="32" Margin="0,0,8,8" Command="{Binding OpenFolderCommand}" CommandParameter="mods" />
+              <Button Style="{StaticResource Fcp.Button}" Content="截图" Tag="{StaticResource Icon.Image}" Height="32" Margin="0,0,8,8" Command="{Binding OpenFolderCommand}" CommandParameter="screenshots" />
+              <Button Style="{StaticResource Fcp.Button}" Content="日志" Tag="{StaticResource Icon.Wrench}" Height="32" Margin="0,0,8,8" Command="{Binding OpenFolderCommand}" CommandParameter="logs" />
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ===================== 设置（当前生效值） ===================== -->
+    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Visibility="{Binding IsSettings, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel Margin="22,18,22,22">
+        <Border Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True">
+          <StackPanel>
+            <TextBlock Text="启动这个版本时的设置" Style="{StaticResource Fcp.Text.CardTitle}" Margin="0,0,0,4" />
+            <TextBlock Text="每一项依次取：FCP 中的版本设置 → PCL 中的版本设置 → 全局设置。" Style="{StaticResource Fcp.Text.Caption}" Margin="0,0,0,14" />
+            <ItemsControl ItemsSource="{Binding EffectiveSettings}" ItemTemplate="{StaticResource InfoRowTemplate}" />
+          </StackPanel>
+        </Border>
+        <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="60">
+          <StackPanel Orientation="Horizontal">
+            <ui:BlockIcon Kind="Fabric" Width="36" Height="36" />
+            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="单独修改这个版本的设置将在下一步推出" FontWeight="SemiBold" />
+              <TextBlock Text="届时每一项都可以选择“跟随全局设置”。现在可以在“设置”标签中修改全局设置。" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,0,0" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ===================== Mod ===================== -->
+    <Grid Grid.Column="1" Margin="22,18,22,0" Visibility="{Binding IsMods, Converter={StaticResource BoolToVisibility}}">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition />
+      </Grid.RowDefinitions>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBox Style="{StaticResource Fcp.SearchBox}" Tag="搜索 Mod 名称或文件名" Text="{Binding ModSearch, UpdateSourceTrigger=PropertyChanged}" />
+        <Button Grid.Column="1" Style="{StaticResource Fcp.Button}" Content="打开 Mod 文件夹" Tag="{StaticResource Icon.Folder}" Margin="10,0,0,0"
+                Command="{Binding OpenFolderCommand}" CommandParameter="mods" />
+      </Grid>
+      <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="4,12,0,6">
+        <TextBlock Text="{Binding ModSummary}" Style="{StaticResource Fcp.Text.Caption}" />
+        <TextBlock Text="  · 正在读取 Mod 信息…" Style="{StaticResource Fcp.Text.Caption}" Visibility="{Binding IsLoadingMods, Converter={StaticResource BoolToVisibility}}" />
+      </StackPanel>
+      <ListBox Grid.Row="2" ItemsSource="{Binding Mods}" ItemContainerStyle="{StaticResource PlainListItem}" Background="Transparent" BorderThickness="0"
+               VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ScrollViewer.CanContentScroll="True"
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0,0,0,16">
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="{x:Type vm:ModItem}">
+            <Border x:Name="Row" CornerRadius="8" Padding="10,8" Margin="0,2,4,2" Background="#B3FFFFFF" ToolTip="{Binding Description}">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="ModName" Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="360" />
+                    <ui:Chip Content="{Binding Version}" Tone="Sky" Margin="8,0,0,0" Visibility="{Binding Version, Converter={StaticResource NullToCollapsed}}" />
+                    <ui:Chip Content="{Binding Loader}" Tone="Amber" Margin="5,0,0,0" Visibility="{Binding Loader, Converter={StaticResource NullToCollapsed}}" />
+                  </StackPanel>
+                  <TextBlock Text="{Binding FileName}" Style="{StaticResource Fcp.Text.Caption}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" Style="{StaticResource Fcp.Toggle}" IsChecked="{Binding IsEnabled}" VerticalAlignment="Center" ToolTip="启用 / 禁用" />
+              </Grid>
+            </Border>
+            <DataTemplate.Triggers>
+              <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                <Setter TargetName="Row" Property="Opacity" Value="0.55" />
+              </DataTrigger>
+            </DataTemplate.Triggers>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Grid>
+
+    <!-- ===================== 资源包 ===================== -->
+    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Visibility="{Binding IsResourcePacks, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel Margin="22,18,22,22">
+        <Grid Margin="0,0,0,10">
+          <TextBlock Text="{Binding ResourcePacksSummary}" Style="{StaticResource Fcp.Text.Caption}" VerticalAlignment="Center" Margin="4,0,0,0" />
+          <Button Style="{StaticResource Fcp.Button}" Content="打开资源包文件夹" Tag="{StaticResource Icon.Folder}" Height="32" HorizontalAlignment="Right"
+                  Command="{Binding OpenFolderCommand}" CommandParameter="resourcepacks" />
+        </Grid>
+        <ItemsControl ItemsSource="{Binding ResourcePacks}" ItemTemplate="{StaticResource ContentItemTemplate}" />
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ===================== 光影 ===================== -->
+    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Visibility="{Binding IsShaders, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel Margin="22,18,22,22">
+        <Grid Margin="0,0,0,10">
+          <TextBlock Text="{Binding ShadersSummary}" Style="{StaticResource Fcp.Text.Caption}" VerticalAlignment="Center" Margin="4,0,0,0" />
+          <Button Style="{StaticResource Fcp.Button}" Content="打开光影文件夹" Tag="{StaticResource Icon.Folder}" Height="32" HorizontalAlignment="Right"
+                  Command="{Binding OpenFolderCommand}" CommandParameter="shaderpacks" />
+        </Grid>
+        <ItemsControl ItemsSource="{Binding Shaders}" ItemTemplate="{StaticResource ContentItemTemplate}" />
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ===================== 存档 ===================== -->
+    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Visibility="{Binding IsSaves, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel Margin="22,18,22,22">
+        <Grid Margin="0,0,0,10">
+          <TextBlock Text="{Binding SavesSummary}" Style="{StaticResource Fcp.Text.Caption}" VerticalAlignment="Center" Margin="4,0,0,0" />
+          <Button Style="{StaticResource Fcp.Button}" Content="打开存档文件夹" Tag="{StaticResource Icon.Folder}" Height="32" HorizontalAlignment="Right"
+                  Command="{Binding OpenFolderCommand}" CommandParameter="saves" />
+        </Grid>
+        <ItemsControl ItemsSource="{Binding Saves}" ItemTemplate="{StaticResource ContentItemTemplate}" />
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

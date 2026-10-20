@@ -21,6 +21,13 @@
 | System.CommandLine | MIT |
 | xunit.v3、Shouldly（仅测试） | Apache-2.0 / BSD-3-Clause |
 
+## 使用的在线服务
+
+| 服务 | 说明 |
+|---|---|
+| Mojang / Minecraft 官方下载服务 | 版本文件、游戏资源、Java 运行时（与官方启动器使用的清单相同） |
+| BMCLAPI（bangbang93） | 国内镜像源。感谢 bangbang93 长期免费提供这项服务；请求中带有本启动器的 User-Agent |
+
 ## 运行时下载的程序
 
 | 程序 | 许可 | 说明 |

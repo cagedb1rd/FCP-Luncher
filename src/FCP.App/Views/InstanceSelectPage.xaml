@@ -9,50 +9,55 @@
       <ColumnDefinition />
     </Grid.ColumnDefinitions>
 
-    <!-- ===== 左栏：游戏文件夹 / 添加或导入 ===== -->
+    <!-- ===== 左栏：游戏文件夹 / 添加 ===== -->
     <Border Background="{StaticResource Brush.Sidebar}" BorderBrush="#80FFFFFF" BorderThickness="0,0,1,0">
-      <StackPanel Margin="0,4,0,0">
-        <TextBlock Text="游戏文件夹" Style="{StaticResource Fcp.Text.Section}" />
-        <ItemsControl ItemsSource="{Binding Folders}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type vm:FolderItem}">
-              <RadioButton Style="{StaticResource Fcp.ListItem}" GroupName="Folders" Tag="{StaticResource Icon.Folder}"
-                           Command="{Binding DataContext.SelectFolderCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                           CommandParameter="{Binding}" ToolTip="{Binding Path}" Loaded="FolderItem_Loaded">
-                <Grid>
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" />
-                  </Grid.ColumnDefinitions>
-                  <StackPanel>
-                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Text="{Binding Path}" Style="{StaticResource Fcp.Text.Caption}" FontWeight="Normal" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
-                  </StackPanel>
-                  <ui:Chip Grid.Column="1" Content="{Binding Source}" Tone="Brand" Margin="6,0,0,0" />
-                </Grid>
-              </RadioButton>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+      <DockPanel Margin="0,4,0,10">
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+          <CheckBox Style="{StaticResource Fcp.Toggle}" Content="显示隐藏的版本" Margin="18,4" IsChecked="{Binding ShowHidden}" ToolTip="快捷键 F11" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Text="游戏文件夹" Style="{StaticResource Fcp.Text.Section}" />
+          <ItemsControl ItemsSource="{Binding State.Folders}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type vm:FolderItem}">
+                <RadioButton Style="{StaticResource Fcp.ListItem}" GroupName="Folders" Tag="{StaticResource Icon.Folder}"
+                             Command="{Binding DataContext.SelectFolderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                             CommandParameter="{Binding}" ToolTip="{Binding Path}" Loaded="FolderItem_Loaded">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                      <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Text="{Binding Path}" Style="{StaticResource Fcp.Text.Caption}" FontWeight="Normal" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <ui:Chip Grid.Column="1" Content="{Binding Source}" Tone="Brand" Margin="6,0,0,0" />
+                  </Grid>
+                </RadioButton>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
 
-        <TextBlock Text="添加或导入" Style="{StaticResource Fcp.Text.Section}" />
-        <Button Style="{StaticResource Fcp.RowButton}" Margin="8,2" Padding="10,8" Command="{Binding AddFolderCommand}">
-          <StackPanel Orientation="Horizontal">
-            <Border Style="{StaticResource Fcp.IconTile}" Width="28" Height="28">
-              <Path Data="{StaticResource Icon.AddCircle}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Fill="{StaticResource Brush.Brand}" />
-            </Border>
-            <TextBlock Text="添加已有文件夹" VerticalAlignment="Center" Margin="10,0,0,0" />
-          </StackPanel>
-        </Button>
-        <Button Style="{StaticResource Fcp.RowButton}" Margin="8,2" Padding="10,8" Command="{Binding AddFolderCommand}">
-          <StackPanel Orientation="Horizontal">
-            <Border Style="{StaticResource Fcp.IconTile}" Width="28" Height="28" Background="{StaticResource Brush.SkySoft}">
-              <Path Data="{StaticResource Icon.Search}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Fill="{StaticResource Brush.Sky}" />
-            </Border>
-            <TextBlock Text="找不到游戏？全盘查找" VerticalAlignment="Center" Margin="10,0,0,0" />
-          </StackPanel>
-        </Button>
-      </StackPanel>
+          <TextBlock Text="添加" Style="{StaticResource Fcp.Text.Section}" />
+          <Button Style="{StaticResource Fcp.RowButton}" Margin="8,2" Padding="10,8" Command="{Binding AddFolderCommand}">
+            <StackPanel Orientation="Horizontal">
+              <Border Style="{StaticResource Fcp.IconTile}" Width="28" Height="28">
+                <Path Data="{StaticResource Icon.AddCircle}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Fill="{StaticResource Brush.Brand}" />
+              </Border>
+              <TextBlock Text="添加已有文件夹" VerticalAlignment="Center" Margin="10,0,0,0" />
+            </StackPanel>
+          </Button>
+          <Button Style="{StaticResource Fcp.RowButton}" Margin="8,2" Padding="10,8" Command="{Binding RefreshCommand}">
+            <StackPanel Orientation="Horizontal">
+              <Border Style="{StaticResource Fcp.IconTile}" Width="28" Height="28" Background="{StaticResource Brush.SkySoft}">
+                <Path Data="{StaticResource Icon.ArrowSync}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Fill="{StaticResource Brush.Sky}" />
+              </Border>
+              <TextBlock Text="重新查找" VerticalAlignment="Center" Margin="10,0,0,0" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </DockPanel>
     </Border>
 
     <!-- ===== 右栏：搜索 + 分组版本卡片 ===== -->
@@ -63,10 +68,20 @@
       </Grid.RowDefinitions>
       <TextBox Style="{StaticResource Fcp.SearchBox}" Tag="搜索版本名称、版本号或加载器" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                ui:Motion.Entrance="True" />
+
+      <!-- 空状态 -->
+      <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,60"
+                  Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}">
+        <ui:BlockIcon Kind="Old" Width="56" Height="56" />
+        <TextBlock Text="这个文件夹里还没有版本" HorizontalAlignment="Center" FontSize="{StaticResource FontSize.Title}" FontWeight="Bold" Margin="0,14,0,0" />
+        <TextBlock Text="FCP 会识别并启动电脑上已有的游戏（不提供游戏本体下载）。可以添加其他 .minecraft 文件夹，或者用原来的启动器安装版本后点击“重新查找”。" Style="{StaticResource Fcp.Text.Caption}"
+                   TextWrapping="Wrap" TextAlignment="Center" MaxWidth="320" Margin="0,6,0,0" />
+      </StackPanel>
+
       <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,14,0,0">
         <ItemsControl ItemsSource="{Binding Groups}" Margin="0,0,4,20">
           <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type vm:InstanceGroup}">
+            <DataTemplate DataType="{x:Type vm:InstanceGroupView}">
               <Border Style="{StaticResource Fcp.Card}" Margin="0,0,0,14" Padding="10,12,10,8" ui:Motion.Entrance="True" ui:Motion.Delay="80">
                 <StackPanel>
                   <StackPanel Orientation="Horizontal" Margin="8,0,0,8">
@@ -78,10 +93,26 @@
                   </StackPanel>
                   <ItemsControl ItemsSource="{Binding Items}">
                     <ItemsControl.ItemTemplate>
-                      <DataTemplate DataType="{x:Type vm:InstanceSummary}">
-                        <Button Style="{StaticResource Fcp.RowButton}"
+                      <DataTemplate DataType="{x:Type vm:InstanceItem}">
+                        <Button Style="{StaticResource Fcp.RowButton}" ToolTip="{Binding Info}"
                                 Command="{Binding DataContext.SelectInstanceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding}">
+                                CommandParameter="{Binding}"
+                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                          <Button.ContextMenu>
+                            <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                              <MenuItem Header="启动游戏" Tag="{StaticResource Icon.Play}" Command="{Binding LaunchInstanceCommand}"
+                                        CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                              <MenuItem Header="{Binding PlacementTarget.DataContext.FavoriteActionText, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Tag="{StaticResource Icon.Star}" Command="{Binding ToggleFavoriteCommand}"
+                                        CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                              <MenuItem Header="版本设置" Tag="{StaticResource Icon.Settings}" Command="{Binding OpenSettingsCommand}"
+                                        CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                              <Separator />
+                              <MenuItem Header="打开游戏文件夹" Tag="{StaticResource Icon.Folder}" Command="{Binding OpenFolderCommand}"
+                                        CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                              <MenuItem Header="创建桌面快捷方式" Tag="{StaticResource Icon.Window}" Command="{Binding CreateShortcutCommand}"
+                                        CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                            </ContextMenu>
+                          </Button.ContextMenu>
                           <Grid>
                             <Grid.ColumnDefinitions>
                               <ColumnDefinition Width="Auto" />
@@ -91,29 +122,41 @@
                             <ui:BlockIcon Kind="{Binding Kind}" Width="36" Height="36" />
                             <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
                               <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="{StaticResource FontSize.Subtitle}" TextTrimming="CharacterEllipsis" />
-                              <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                              <StackPanel x:Name="Chips" Orientation="Horizontal" Margin="0,5,0,0">
                                 <ui:Chip Content="{Binding McVersion}" Tone="Sky" Margin="0,0,5,0" />
                                 <ui:Chip x:Name="LoaderChip" Content="{Binding Loader}" Tone="Amber" Margin="0,0,5,0" />
                                 <ui:Chip x:Name="AccountChip" Content="{Binding Account}" Tone="Purple" Margin="0,0,8,0" />
                                 <TextBlock Style="{StaticResource Fcp.Text.Caption}" VerticalAlignment="Center">
-                                  <Run Text="上次游玩 " /><Run Text="{Binding LastPlayed, Mode=OneWay}" />
+                                  <Run Text="{Binding ActivityText, Mode=OneWay}" />
                                 </TextBlock>
                               </StackPanel>
+                              <!-- 有问题的版本：显示原因 -->
+                              <TextBlock x:Name="Problem" Text="{Binding Info}" Style="{StaticResource Fcp.Text.Caption}" Foreground="{StaticResource Brush.Danger}"
+                                         TextTrimming="CharacterEllipsis" Margin="0,5,0,0" Visibility="Collapsed" />
                             </StackPanel>
-                            <Path x:Name="Star" Grid.Column="2" Data="{StaticResource Icon.Star}" Style="{StaticResource Fcp.Icon}" Width="18" Height="18"
-                                  Fill="{StaticResource Brush.TextTertiary}" ToolTip="收藏" Margin="0,0,6,0" />
+                            <Button x:Name="StarButton" Grid.Column="2" Style="{StaticResource Fcp.RowButton}" Padding="6" ToolTip="收藏"
+                                    Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                              <Path x:Name="Star" Data="{StaticResource Icon.Star}" Style="{StaticResource Fcp.Icon}" Width="18" Height="18" Fill="{StaticResource Brush.TextTertiary}" />
+                            </Button>
                           </Grid>
                         </Button>
                         <DataTemplate.Triggers>
                           <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                             <Setter TargetName="Star" Property="Data" Value="{StaticResource Icon.StarFilled}" />
                             <Setter TargetName="Star" Property="Fill" Value="{StaticResource Brush.Amber}" />
+                            <Setter TargetName="StarButton" Property="ToolTip" Value="取消收藏" />
                           </DataTrigger>
                           <DataTrigger Binding="{Binding Loader}" Value="{x:Null}">
                             <Setter TargetName="LoaderChip" Property="Visibility" Value="Collapsed" />
                           </DataTrigger>
                           <DataTrigger Binding="{Binding Account}" Value="{x:Null}">
                             <Setter TargetName="AccountChip" Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding IsHealthy}" Value="False">
+                            <Setter TargetName="Chips" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="Problem" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="StarButton" Property="Visibility" Value="Collapsed" />
                           </DataTrigger>
                         </DataTemplate.Triggers>
                       </DataTemplate>

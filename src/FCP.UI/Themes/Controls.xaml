@@ -127,9 +127,67 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ToolTip">
-          <Border Background="#E61A2A22" CornerRadius="6" Padding="9,5" Margin="6">
-            <ContentPresenter />
+          <Border Background="#E61A2A22" CornerRadius="6" Padding="9,5" Margin="6" MaxWidth="380">
+            <ContentPresenter>
+              <ContentPresenter.Resources>
+                <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap" /></Style>
+              </ContentPresenter.Resources>
+            </ContentPresenter>
           </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- 右键菜单 -->
+  <Style TargetType="ContextMenu">
+    <Setter Property="FontFamily" Value="{StaticResource Font.Ui}" />
+    <Setter Property="FontSize" Value="{StaticResource FontSize.Body}" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}" />
+    <Setter Property="HasDropShadow" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ContextMenu">
+          <Border Background="{StaticResource Brush.CardSolid}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1"
+                  CornerRadius="10" Padding="4" Margin="8" MinWidth="170" Effect="{StaticResource Shadow.Elevated}">
+            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style TargetType="MenuItem">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="MenuItem">
+          <Border x:Name="Bg" Background="Transparent" CornerRadius="6" Padding="10,7">
+            <StackPanel Orientation="Horizontal">
+              <Path x:Name="MenuIcon" Data="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" Style="{StaticResource Fcp.Icon}"
+                    Width="14" Height="14" Fill="{StaticResource Brush.Brand}" Margin="0,0,10,0" />
+              <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center" />
+            </StackPanel>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Tag" Value="{x:Null}">
+              <Setter TargetName="MenuIcon" Property="Visibility" Value="Hidden" />
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+              <Setter TargetName="Bg" Property="Background" Value="{StaticResource Brush.BrandSoft}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Separator">
+          <Border Height="1" Margin="8,4" Background="{StaticResource Brush.Border}" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
@@ -302,6 +360,75 @@
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
               <Setter TargetName="Bg" Property="Opacity" Value="0.5" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- 主要操作按钮（对话框的确认等）：品牌渐变 + 白字 -->
+  <Style x:Key="Fcp.PrimaryButton" TargetType="Button" BasedOn="{StaticResource Fcp.Button}">
+    <Setter Property="Foreground" Value="{StaticResource Brush.OnBrand}" />
+    <Setter Property="Background" Value="{StaticResource Brush.BrandGradient}" />
+    <Setter Property="BorderBrush" Value="#30FFFFFF" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                  CornerRadius="{StaticResource Radius.Control}" Padding="{TemplateBinding Padding}" Effect="{StaticResource Shadow.BrandGlow}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Path x:Name="IconPath" Data="{TemplateBinding Tag}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Margin="0,0,7,0" Fill="{TemplateBinding Foreground}" />
+              <ContentPresenter VerticalAlignment="Center" />
+            </StackPanel>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Tag" Value="{x:Null}">
+              <Setter TargetName="IconPath" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bg" Property="Background" Value="{StaticResource Brush.BrandGradientHover}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Trigger.EnterActions><BeginStoryboard Storyboard="{StaticResource Anim.PressDown}" /></Trigger.EnterActions>
+              <Trigger.ExitActions><BeginStoryboard Storyboard="{StaticResource Anim.PressUp}" /></Trigger.ExitActions>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Bg" Property="Opacity" Value="0.45" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- 普通输入框：Tag = 占位提示 -->
+  <Style x:Key="Fcp.TextBox" TargetType="TextBox">
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextPrimary}" />
+    <Setter Property="FontSize" Value="{StaticResource FontSize.Subtitle}" />
+    <Setter Property="Height" Value="38" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="CaretBrush" Value="{StaticResource Brush.Brand}" />
+    <Setter Property="SelectionBrush" Value="{StaticResource Brush.Brand}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Grid>
+            <Border x:Name="Bg" Background="{StaticResource Brush.CardSolid}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1.5" CornerRadius="{StaticResource Radius.Control}" />
+            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" Focusable="False" />
+            <TextBlock x:Name="Hint" Text="{TemplateBinding Tag}" Margin="13,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource Brush.TextTertiary}" IsHitTestVisible="False" Visibility="Collapsed" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Text" Value="">
+              <Setter TargetName="Hint" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource Brush.BrandSoftHover}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource Brush.Brand}" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>

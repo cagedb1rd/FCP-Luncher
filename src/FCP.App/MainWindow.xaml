@@ -133,5 +133,11 @@
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
+
+    <!-- ===== 对话框（覆盖整个窗口） ===== -->
+    <Grid Grid.RowSpan="2" Visibility="{Binding HasDialog, Converter={StaticResource BoolToVisibility}}" WindowChrome.IsHitTestVisibleInChrome="True">
+      <Rectangle Fill="#6616231C" />
+      <ContentControl Content="{Binding Dialog}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40" Focusable="False" />
+    </Grid>
   </Grid>
 </Window>

@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="clr-namespace:FCP.UI.Controls;assembly=FCP.UI"
-             xmlns:vm="clr-namespace:FCP.App.ViewModels">
+             xmlns:java="clr-namespace:FCP.Core.Java;assembly=FCP.Core">
   <UserControl.Resources>
     <!-- “游戏启动后”的选项卡片 -->
     <Style x:Key="OptionCard" TargetType="RadioButton">
@@ -30,6 +30,7 @@
         </Setter.Value>
       </Setter>
     </Style>
+
   </UserControl.Resources>
 
   <Grid>
@@ -54,150 +55,315 @@
 
     <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
       <StackPanel Margin="22,18,22,22">
-        <!-- 启动选项 -->
-        <Border Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True">
+        <!-- ===================== 启动 ===================== -->
+        <StackPanel Visibility="{Binding IsLaunchSection, Converter={StaticResource BoolToVisibility}}">
+          <!-- 启动选项 -->
+          <Border Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource Fcp.IconTile}">
+                  <Path Data="{StaticResource Icon.Play}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
+                </Border>
+                <TextBlock Text="启动选项" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+              </StackPanel>
+              <Grid Margin="2,14,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="为安装了 Mod 的版本开启版本隔离" />
+                  <TextBlock Text="存档、Mod 和设置与其他版本互不影响，避免 Mod 冲突。在 PCL 中设置过的版本沿用原来的设置" Style="{StaticResource Fcp.Text.Caption}" TextWrapping="Wrap" Margin="0,3,12,0" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" Style="{StaticResource Fcp.Toggle}" IsChecked="{Binding IsolateModdedByDefault}" VerticalAlignment="Center" />
+              </Grid>
+              <Grid Margin="2,14,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="自动把游戏语言设为简体中文" />
+                  <TextBlock Text="仅在第一次启动某个版本时设置，之后不会再改动" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,0,0" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" Style="{StaticResource Fcp.Toggle}" IsChecked="{Binding AutoChineseLanguage}" VerticalAlignment="Center" />
+              </Grid>
+              <Grid Margin="2,14,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="游戏进程优先级" />
+                  <TextBlock Text="较高的优先级可以减少卡顿，但可能让同时运行的其他程序变慢" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,12,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                  <RadioButton Content="高" GroupName="Priority" Margin="0,0,16,0" IsChecked="{Binding Priority, Converter={StaticResource EnumEquals}, ConverterParameter=High}" />
+                  <RadioButton Content="中" GroupName="Priority" Margin="0,0,16,0" IsChecked="{Binding Priority, Converter={StaticResource EnumEquals}, ConverterParameter=Normal}" />
+                  <RadioButton Content="低" GroupName="Priority" IsChecked="{Binding Priority, Converter={StaticResource EnumEquals}, ConverterParameter=Low}" />
+                </StackPanel>
+              </Grid>
+              <TextBlock Text="游戏启动后，启动器" Margin="2,16,0,8" />
+              <UniformGrid Columns="4">
+                <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Window}" GroupName="Visibility"
+                             IsChecked="{Binding Visibility, Converter={StaticResource EnumEquals}, ConverterParameter=KeepOpen}">
+                  <StackPanel>
+                    <TextBlock Text="保持不变" FontWeight="SemiBold" />
+                    <TextBlock Text="方便同时操作" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                  </StackPanel>
+                </RadioButton>
+                <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Subtract}" GroupName="Visibility"
+                             IsChecked="{Binding Visibility, Converter={StaticResource EnumEquals}, ConverterParameter=Minimize}">
+                  <StackPanel>
+                    <TextBlock Text="最小化" FontWeight="SemiBold" />
+                    <TextBlock Text="留在任务栏" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                  </StackPanel>
+                </RadioButton>
+                <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Sparkle}" GroupName="Visibility"
+                             IsChecked="{Binding Visibility, Converter={StaticResource EnumEquals}, ConverterParameter=HideAndRestore}">
+                  <StackPanel>
+                    <TextBlock Text="隐藏" FontWeight="SemiBold" />
+                    <TextBlock Text="游戏退出后回来" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                  </StackPanel>
+                </RadioButton>
+                <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Dismiss}" GroupName="Visibility"
+                             IsChecked="{Binding Visibility, Converter={StaticResource EnumEquals}, ConverterParameter=Exit}">
+                  <StackPanel>
+                    <TextBlock Text="关闭" FontWeight="SemiBold" />
+                    <TextBlock Text="节省内存" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                  </StackPanel>
+                </RadioButton>
+              </UniformGrid>
+            </StackPanel>
+          </Border>
+
+          <!-- 内存分配 -->
+          <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="70">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource Fcp.IconTile}" Background="{StaticResource Brush.SkySoft}">
+                  <Path Data="{StaticResource Icon.Memory}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Sky}" />
+                </Border>
+                <TextBlock Text="内存分配" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Margin="2,14,0,0">
+                <RadioButton Content="自动配置（推荐）" GroupName="Memory" IsChecked="{Binding IsMemoryAuto}" Margin="0,0,26,0" />
+                <RadioButton Content="自定义" GroupName="Memory" IsChecked="{Binding IsMemoryCustom}" />
+              </StackPanel>
+              <TextBlock Style="{StaticResource Fcp.Text.Caption}" TextWrapping="Wrap" Margin="2,10,0,0" LineHeight="19"
+                         Visibility="{Binding IsMemoryAuto, Converter={StaticResource BoolToVisibility}}"
+                         Text="每次启动时根据 Mod 数量和电脑当前的剩余内存计算：基础 2.5 GB，每个 Mod 再加 16 MB，至少给系统留出 2 GB。单独设置过内存的版本（包括在 PCL 中设置的）使用自己的值。" />
+              <StackPanel Visibility="{Binding IsMemoryCustom, Converter={StaticResource BoolToVisibility}}">
+                <Grid Margin="2,14,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="80" />
+                  </Grid.ColumnDefinitions>
+                  <Slider Minimum="1" Maximum="{Binding MaxMemoryGb}" Value="{Binding MemoryGb}" TickFrequency="0.5" IsSnapToTickEnabled="True" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="1" Text="{Binding MemoryGb, StringFormat={}{0:0.#} GB}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                             FontSize="{StaticResource FontSize.Hero}" FontWeight="Bold" Foreground="{StaticResource Brush.BrandDeep}" />
+                </Grid>
+                <!-- 比例条：已使用 / 游戏分配 / 剩余 -->
+                <Grid Height="10" Margin="2,14,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding MemoryUsedRatio, Converter={StaticResource RatioToStar}}" />
+                    <ColumnDefinition Width="{Binding MemoryGameRatio, Converter={StaticResource RatioToStar}}" />
+                    <ColumnDefinition Width="{Binding MemoryFreeRatio, Converter={StaticResource RatioToStar}}" />
+                  </Grid.ColumnDefinitions>
+                  <Border Background="#9AA8A0" CornerRadius="5,0,0,5" Margin="0,0,2,0" />
+                  <Border Grid.Column="1" Background="{StaticResource Brush.BrandGradient}" Margin="0,0,2,0" />
+                  <Border Grid.Column="2" Background="#DCE5E0" CornerRadius="0,5,5,0" />
+                </Grid>
+                <WrapPanel Margin="2,10,0,0">
+                  <Ellipse Width="8" Height="8" Fill="#9AA8A0" VerticalAlignment="Center" />
+                  <TextBlock Style="{StaticResource Fcp.Text.Caption}" Margin="6,0,16,0"><Run Text="已使用 " /><Run Text="{Binding UsedMemoryGb, Mode=OneWay, StringFormat={}{0:0.#} GB}" /></TextBlock>
+                  <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Brand}" VerticalAlignment="Center" />
+                  <TextBlock Style="{StaticResource Fcp.Text.Caption}" Margin="6,0,16,0"><Run Text="游戏分配 " /><Run Text="{Binding MemoryGb, Mode=OneWay, StringFormat={}{0:0.#} GB}" /></TextBlock>
+                  <Ellipse Width="8" Height="8" Fill="#DCE5E0" VerticalAlignment="Center" />
+                  <TextBlock Style="{StaticResource Fcp.Text.Caption}" Margin="6,0,0,0"><Run Text="剩余 " /><Run Text="{Binding MemoryFreeGb, Mode=OneWay, StringFormat={}{0:0.#} GB}" /></TextBlock>
+                </WrapPanel>
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <!-- Java 管理 -->
+          <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="140">
+            <StackPanel>
+              <Grid>
+                <StackPanel Orientation="Horizontal">
+                  <Border Style="{StaticResource Fcp.IconTile}" Background="{StaticResource Brush.PurpleSoft}">
+                    <Path Data="{StaticResource Icon.Shield}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Purple}" />
+                  </Border>
+                  <TextBlock Text="Java 管理" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                  <Button Style="{StaticResource Fcp.Button}" Content="手动添加" Tag="{StaticResource Icon.AddCircle}" Height="32" Command="{Binding AddJavaCommand}" Margin="0,0,8,0" />
+                  <Button Style="{StaticResource Fcp.Button}" Content="重新扫描" Tag="{StaticResource Icon.ArrowSync}" Height="32" Command="{Binding RescanJavaCommand}" />
+                </StackPanel>
+              </Grid>
+              <TextBlock Style="{StaticResource Fcp.Text.Caption}" TextWrapping="Wrap" Margin="2,10,0,4"
+                         Text="启动时会为每个版本自动选择合适的 Java，并在启动界面说明原因。新安装的 Java 会被自动发现。" />
+              <ItemsControl ItemsSource="{Binding Javas}" Margin="0,6,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="{x:Type java:JavaRuntime}">
+                    <Border CornerRadius="8" Padding="10,8" Margin="0,3" Background="#80FFFFFF">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition />
+                          <ColumnDefinition Width="Auto" />
+                          <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                          <StackPanel Orientation="Horizontal">
+                            <TextBlock FontWeight="Bold"><Run Text="Java " /><Run Text="{Binding Major, Mode=OneWay}" /></TextBlock>
+                            <TextBlock Text="{Binding Version}" Foreground="{StaticResource Brush.TextSecondary}" Margin="8,0,0,0" />
+                            <TextBlock Text="{Binding Vendor}" Foreground="{StaticResource Brush.TextSecondary}" Margin="8,0,0,0" />
+                            <ui:Chip x:Name="Bits" Content="32 位" Tone="Amber" Margin="8,0,0,0" Visibility="Collapsed" />
+                          </StackPanel>
+                          <TextBlock Text="{Binding JavaExecutable}" Style="{StaticResource Fcp.Text.Caption}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0" ToolTip="{Binding JavaExecutable}" />
+                        </StackPanel>
+                        <ui:Chip Grid.Column="1" Content="{Binding Source, Converter={StaticResource JavaSourceText}}" Tone="Gray" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Style="{StaticResource Fcp.RowButton}" Padding="6" Margin="6,0,0,0" ToolTip="打开所在文件夹"
+                                Command="{Binding DataContext.OpenJavaFolderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                          <Path Data="{StaticResource Icon.Folder}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Fill="{StaticResource Brush.TextSecondary}" />
+                        </Button>
+                      </Grid>
+                    </Border>
+                    <DataTemplate.Triggers>
+                      <DataTrigger Binding="{Binding Is64Bit}" Value="False">
+                        <Setter TargetName="Bits" Property="Visibility" Value="Visible" />
+                      </DataTrigger>
+                    </DataTemplate.Triggers>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="正在查找 Java…" Style="{StaticResource Fcp.Text.Caption}" Margin="2,8,0,0"
+                         Visibility="{Binding IsScanningJava, Converter={StaticResource BoolToVisibility}}" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- ===================== 下载 ===================== -->
+        <Border Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True"
+                Visibility="{Binding IsDownloadSection, Converter={StaticResource BoolToVisibility}}">
           <StackPanel>
             <StackPanel Orientation="Horizontal">
-              <Border Style="{StaticResource Fcp.IconTile}">
-                <Path Data="{StaticResource Icon.Play}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
+              <Border Style="{StaticResource Fcp.IconTile}" Background="{StaticResource Brush.SkySoft}">
+                <Path Data="{StaticResource Icon.Download}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Sky}" />
               </Border>
-              <TextBlock Text="启动选项" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+              <TextBlock Text="下载源" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
             </StackPanel>
-            <Grid Margin="2,14,0,0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-              <StackPanel>
-                <TextBlock Text="为安装了 Mod 的版本开启版本隔离" />
-                <TextBlock Text="存档、Mod 和设置与其他版本互不影响，避免 Mod 冲突" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,0,0" />
-              </StackPanel>
-              <CheckBox Grid.Column="1" Style="{StaticResource Fcp.Toggle}" IsChecked="{Binding IsolateModdedByDefault}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="2,14,0,0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-              <StackPanel>
-                <TextBlock Text="自动把游戏语言设为简体中文" />
-                <TextBlock Text="仅在第一次启动某个版本时设置，之后不会再改动" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,0,0" />
-              </StackPanel>
-              <CheckBox Grid.Column="1" Style="{StaticResource Fcp.Toggle}" IsChecked="{Binding AutoChineseLanguage}" VerticalAlignment="Center" />
-            </Grid>
-            <TextBlock Text="游戏启动后，启动器" Margin="2,16,0,8" />
+            <TextBlock Style="{StaticResource Fcp.Text.Caption}" TextWrapping="Wrap" Margin="2,10,0,12" LineHeight="19"
+                       Text="补全依赖库和资源文件、下载 Java 时使用（FCP 不提供游戏本体下载）。无论选择哪一项，一个源下载失败时都会自动换另一个源重试。" />
             <UniformGrid Columns="3">
-              <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Window}" GroupName="Visibility"
-                           IsChecked="{Binding Visibility, Converter={StaticResource EnumEquals}, ConverterParameter=KeepOpen}">
+              <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Sparkle}" GroupName="DownloadSource"
+                           IsChecked="{Binding DownloadSource, Converter={StaticResource EnumEquals}, ConverterParameter=Auto}">
                 <StackPanel>
-                  <TextBlock Text="保持不变" FontWeight="SemiBold" />
-                  <TextBlock Text="方便同时操作" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                  <TextBlock Text="自动选择（推荐）" FontWeight="SemiBold" />
+                  <TextBlock Text="测速后使用更快的源" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
                 </StackPanel>
               </RadioButton>
-              <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Subtract}" GroupName="Visibility"
-                           IsChecked="{Binding Visibility, Converter={StaticResource EnumEquals}, ConverterParameter=Minimize}">
+              <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Globe}" GroupName="DownloadSource"
+                           IsChecked="{Binding DownloadSource, Converter={StaticResource EnumEquals}, ConverterParameter=Official}">
                 <StackPanel>
-                  <TextBlock Text="最小化" FontWeight="SemiBold" />
-                  <TextBlock Text="留在任务栏" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                  <TextBlock Text="官方源" FontWeight="SemiBold" />
+                  <TextBlock Text="Mojang 与各加载器官方" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
                 </StackPanel>
               </RadioButton>
-              <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Sparkle}" GroupName="Visibility"
-                           IsChecked="{Binding Visibility, Converter={StaticResource EnumEquals}, ConverterParameter=HideAndRestore}">
+              <RadioButton Style="{StaticResource OptionCard}" Tag="{StaticResource Icon.Download}" GroupName="DownloadSource"
+                           IsChecked="{Binding DownloadSource, Converter={StaticResource EnumEquals}, ConverterParameter=Mirror}">
                 <StackPanel>
-                  <TextBlock Text="隐藏" FontWeight="SemiBold" />
-                  <TextBlock Text="游戏退出后自动回来" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                  <TextBlock Text="镜像源" FontWeight="SemiBold" />
+                  <TextBlock Text="BMCLAPI，国内通常更快" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
                 </StackPanel>
               </RadioButton>
             </UniformGrid>
           </StackPanel>
         </Border>
 
-        <!-- 内存分配 -->
-        <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="70">
-          <StackPanel>
-            <StackPanel Orientation="Horizontal">
-              <Border Style="{StaticResource Fcp.IconTile}" Background="{StaticResource Brush.SkySoft}">
-                <Path Data="{StaticResource Icon.Memory}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Sky}" />
-              </Border>
-              <TextBlock Text="内存分配" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+        <!-- ===================== 个性化：后续推出 ===================== -->
+        <Border Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True"
+                Visibility="{Binding IsComingSoonSection, Converter={StaticResource BoolToVisibility}}">
+          <StackPanel Orientation="Horizontal">
+            <ui:BlockIcon Kind="Fabric" Width="40" Height="40" />
+            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="这部分设置将在后续版本推出" FontWeight="SemiBold" />
+              <TextBlock Text="主题、背景图片和主页内容等选项正在制作中。" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,0,0" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="2,14,0,0">
-              <RadioButton Content="自动配置（推荐）" IsChecked="{Binding IsMemoryAuto}" Margin="0,0,26,0" />
-              <RadioButton Content="自定义" IsChecked="{Binding IsMemoryCustom}" />
-            </StackPanel>
-            <Grid Margin="2,14,0,0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="80" />
-              </Grid.ColumnDefinitions>
-              <Slider Minimum="1" Maximum="24" Value="{Binding MemoryGb}" TickFrequency="0.5" IsSnapToTickEnabled="True" VerticalAlignment="Center" />
-              <TextBlock Grid.Column="1" Text="{Binding MemoryGb, StringFormat={}{0:0.#} GB}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                         FontSize="{StaticResource FontSize.Hero}" FontWeight="Bold" Foreground="{StaticResource Brush.BrandDeep}" />
-            </Grid>
-            <!-- 比例条：已使用 / 游戏分配 / 剩余 -->
-            <Grid Height="10" Margin="2,14,0,0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding MemoryUsedRatio, Converter={StaticResource RatioToStar}}" />
-                <ColumnDefinition Width="{Binding MemoryGameRatio, Converter={StaticResource RatioToStar}}" />
-                <ColumnDefinition Width="{Binding MemoryFreeRatio, Converter={StaticResource RatioToStar}}" />
-              </Grid.ColumnDefinitions>
-              <Border Background="#9AA8A0" CornerRadius="5,0,0,5" Margin="0,0,2,0" />
-              <Border Grid.Column="1" Background="{StaticResource Brush.BrandGradient}" Margin="0,0,2,0" />
-              <Border Grid.Column="2" Background="#DCE5E0" CornerRadius="0,5,5,0" />
-            </Grid>
-            <WrapPanel Margin="2,10,0,0">
-              <Ellipse Width="8" Height="8" Fill="#9AA8A0" VerticalAlignment="Center" />
-              <TextBlock Style="{StaticResource Fcp.Text.Caption}" Margin="6,0,16,0"><Run Text="已使用 " /><Run Text="{Binding UsedMemoryGb, Mode=OneWay, StringFormat={}{0:0.#} GB}" /></TextBlock>
-              <Ellipse Width="8" Height="8" Fill="{StaticResource Brush.Brand}" VerticalAlignment="Center" />
-              <TextBlock Style="{StaticResource Fcp.Text.Caption}" Margin="6,0,16,0"><Run Text="游戏分配 " /><Run Text="{Binding MemoryGb, Mode=OneWay, StringFormat={}{0:0.#} GB}" /></TextBlock>
-              <Ellipse Width="8" Height="8" Fill="#DCE5E0" VerticalAlignment="Center" />
-              <TextBlock Style="{StaticResource Fcp.Text.Caption}" Margin="6,0,0,0"><Run Text="剩余 " /><Run Text="{Binding MemoryFreeGb, Mode=OneWay, StringFormat={}{0:0.#} GB}" /></TextBlock>
-            </WrapPanel>
           </StackPanel>
         </Border>
 
-        <!-- Java 管理 -->
-        <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="140">
-          <StackPanel>
-            <Grid>
+        <!-- ===================== 其他 ===================== -->
+        <StackPanel Visibility="{Binding IsOtherSection, Converter={StaticResource BoolToVisibility}}">
+          <Border Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True">
+            <StackPanel>
               <StackPanel Orientation="Horizontal">
-                <Border Style="{StaticResource Fcp.IconTile}" Background="{StaticResource Brush.PurpleSoft}">
-                  <Path Data="{StaticResource Icon.Shield}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Purple}" />
+                <Border Style="{StaticResource Fcp.IconTile}" Background="{StaticResource Brush.AmberSoft}">
+                  <Path Data="{StaticResource Icon.Folder}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Amber}" />
                 </Border>
-                <TextBlock Text="Java 管理" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+                <TextBlock Text="启动器文件" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
               </StackPanel>
-              <Button Style="{StaticResource Fcp.Button}" Content="重新扫描" Tag="{StaticResource Icon.ArrowSync}" HorizontalAlignment="Right" Height="32" />
-            </Grid>
-            <ItemsControl ItemsSource="{Binding Javas}" Margin="0,10,0,0">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type vm:JavaEntry}">
-                  <Border CornerRadius="8" Padding="10,8" Margin="0,3" Background="#80FFFFFF">
-                    <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="Auto" />
-                      </Grid.ColumnDefinitions>
-                      <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                          <TextBlock Text="{Binding Version}" FontWeight="Bold" />
-                          <TextBlock Text="{Binding Vendor}" Foreground="{StaticResource Brush.TextSecondary}" Margin="8,0,0,0" />
-                          <ui:Chip x:Name="Recommended" Content="推荐" Tone="Brand" Margin="8,0,0,0" Visibility="Collapsed" />
-                        </StackPanel>
-                        <TextBlock Text="{Binding Path}" Style="{StaticResource Fcp.Text.Caption}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0" />
-                      </StackPanel>
-                      <ui:Chip Grid.Column="1" Content="{Binding Source}" Tone="Gray" />
-                    </Grid>
-                  </Border>
-                  <DataTemplate.Triggers>
-                    <DataTrigger Binding="{Binding IsRecommended}" Value="True">
-                      <Setter TargetName="Recommended" Property="Visibility" Value="Visible" />
-                    </DataTrigger>
-                  </DataTemplate.Triggers>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </StackPanel>
-        </Border>
+              <Grid Margin="2,14,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="设置和账号" />
+                  <TextBlock Text="{Binding ConfigDirectory}" Style="{StaticResource Fcp.Text.Caption}" TextTrimming="CharacterEllipsis" Margin="0,3,12,0" />
+                </StackPanel>
+                <Button Grid.Column="1" Style="{StaticResource Fcp.Button}" Content="打开" Tag="{StaticResource Icon.Folder}" Height="32" Command="{Binding OpenConfigFolderCommand}" />
+              </Grid>
+              <Grid Margin="2,12,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="下载的 Java、缓存和备份" />
+                  <TextBlock Text="{Binding DataDirectory}" Style="{StaticResource Fcp.Text.Caption}" TextTrimming="CharacterEllipsis" Margin="0,3,12,0" />
+                </StackPanel>
+                <Button Grid.Column="1" Style="{StaticResource Fcp.Button}" Content="打开" Tag="{StaticResource Icon.Folder}" Height="32" Command="{Binding OpenDataFolderCommand}" />
+              </Grid>
+              <Grid Margin="2,12,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="日志" />
+                  <TextBlock Text="遇到问题时，把这里的文件发给开发者可以帮助定位原因" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,12,0" />
+                </StackPanel>
+                <Button Grid.Column="1" Style="{StaticResource Fcp.Button}" Content="打开" Tag="{StaticResource Icon.Folder}" Height="32" Command="{Binding OpenLogsFolderCommand}" />
+              </Grid>
+            </StackPanel>
+          </Border>
+          <!-- 从 PCL 迁移 -->
+          <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="70"
+                  Visibility="{Binding HasPcl, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource Fcp.IconTile}">
+                  <Path Data="{StaticResource Icon.ArrowSync}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
+                </Border>
+                <TextBlock Text="从 PCL 迁移" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+              </StackPanel>
+              <Grid Margin="2,14,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="重新从 PCL 导入设置" />
+                  <TextBlock Text="{Binding PclImportText, TargetNullValue='第一次打开时会自动导入 PCL 的设置'}" Style="{StaticResource Fcp.Text.Caption}" TextTrimming="CharacterEllipsis" Margin="0,3,12,0" />
+                  <TextBlock Text="在 FCP 中修改的设置不会同步回 PCL，PCL 的文件也不会被修改。" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,12,0" />
+                </StackPanel>
+                <Button Grid.Column="1" Style="{StaticResource Fcp.Button}" Content="重新导入" Tag="{StaticResource Icon.ArrowSync}" Height="32" Command="{Binding ReimportFromPclCommand}" />
+              </Grid>
+            </StackPanel>
+          </Border>
+          <TextBlock Text="{Binding VersionText}" Style="{StaticResource Fcp.Text.Caption}" HorizontalAlignment="Center" Margin="0,16,0,0" />
+        </StackPanel>
       </StackPanel>
     </ScrollViewer>
   </Grid>

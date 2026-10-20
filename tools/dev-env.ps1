@@ -11,6 +11,10 @@ if ($dotnetRoot) {
 }
 if (-not $env:NUGET_PACKAGES -and (Test-Path 'D:\')) { $env:NUGET_PACKAGES = 'D:\dotnet-data\nuget\packages' }
 if (-not $env:NUGET_HTTP_CACHE_PATH -and (Test-Path 'D:\')) { $env:NUGET_HTTP_CACHE_PATH = 'D:\dotnet-data\nuget\http-cache' }
+# 开发时启动器自己的配置和数据放在沙盒中，不写入 %APPDATA%（C 盘）
+$repoRoot = Split-Path -Parent $PSScriptRoot
+if (-not $env:FCP_CONFIG_DIR) { $env:FCP_CONFIG_DIR = Join-Path $repoRoot 'sandbox\fcp-config' }
+if (-not $env:FCP_DATA_DIR) { $env:FCP_DATA_DIR = Join-Path $repoRoot 'sandbox\fcp-data' }
 $env:DOTNET_NOLOGO = '1'
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
