@@ -1,5 +1,7 @@
 # FCP（暂定名）
 
+[English](README.en.md) | **中文**
+
 一款面向 **PCL2 用户**的 Minecraft Java 版 Windows 启动器：
 
 - **熟悉**：启动页、版本选择、版本设置、设置项的位置和逻辑延续 PCL 的习惯，老用户不需要学习。
