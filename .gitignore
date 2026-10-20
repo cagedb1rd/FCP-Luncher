@@ -20,3 +20,7 @@ TestResults/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# 内部设计文档与开发助手说明（只保留在本地）
+/docs/
+/CLAUDE.md
