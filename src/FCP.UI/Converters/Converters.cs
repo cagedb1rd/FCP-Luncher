@@ -14,6 +14,36 @@ public sealed class EnumEqualsConverter : IValueConverter
         value is true && parameter is not null ? Enum.Parse(targetType, parameter.ToString()!) : Binding.DoNothing;
 }
 
+/// <summary>把资源键（例如 "Icon.Puzzle"）转换为对应的资源对象。</summary>
+public sealed class ResourceKeyConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is null ? null : Application.Current.TryFindResource(value);
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
+/// <summary>null 或空字符串 → Collapsed，否则 Visible。</summary>
+public sealed class NullToCollapsedConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is null || value is string { Length: 0 } ? Visibility.Collapsed : Visibility.Visible;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
+/// <summary>把 0~1 的比例转换为 Grid 的星号宽度（用于比例条）。</summary>
+public sealed class RatioToStarConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        new GridLength(Math.Max(0.0001, value is double d ? d : 0), GridUnitType.Star);
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
 /// <summary>true → Visible，false → Collapsed；ConverterParameter="Invert" 时反转。</summary>
 public sealed class BoolToVisibilityConverter : IValueConverter
 {

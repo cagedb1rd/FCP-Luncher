@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using FCP.App.ViewModels;
 using FCP.UI.Interop;
 
@@ -13,6 +14,7 @@ namespace FCP.App;
 public partial class MainWindow : Window
 {
     private readonly ShellViewModel _shell;
+    private readonly string? _snapshotDirectory = Environment.GetEnvironmentVariable("FCP_SNAPSHOT_DIR");
 
     public MainWindow()
     {
@@ -23,6 +25,17 @@ public partial class MainWindow : Window
         SourceInitialized += (_, _) => WindowEffects.TryEnableRoundedCorners(this);
         ContentRendered += OnContentRendered;
         PreviewKeyDown += OnPreviewKeyDown;
+
+        if (!string.IsNullOrEmpty(_snapshotDirectory))
+        {
+            // 截图模式：窗口放在屏幕外渲染，不抢焦点，也不出现在任务栏
+            // 注意：(-32000, -32000) 是 Windows 表示“最小化窗口”的特殊坐标，窗口放在那里不会渲染
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = SystemParameters.VirtualScreenLeft - Width - 200;
+            Top = SystemParameters.VirtualScreenTop;
+            ShowActivated = false;
+            ShowInTaskbar = false;
+        }
     }
 
     private void OnShellPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -56,20 +69,75 @@ public partial class MainWindow : Window
             _shell.BackCommand.Execute(null);
             e.Handled = true;
         }
+        else if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control && _shell.CurrentPage is LaunchPageViewModel launch)
+        {
+            launch.LaunchCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    private async void OnContentRendered(object? sender, EventArgs e)
+    {
+        // 启动耗时测量（CI 冒烟测试）：首帧渲染后写入“进程启动 → 首帧”的毫秒数并退出
+        if (Environment.GetEnvironmentVariable("FCP_MEASURE_STARTUP") is { Length: > 0 } measureFile)
+        {
+            var elapsed = DateTime.Now - Process.GetCurrentProcess().StartTime;
+            File.AppendAllText(measureFile, $"{elapsed.TotalMilliseconds:F0}{Environment.NewLine}");
+            Application.Current.Shutdown();
+            return;
+        }
+        if (!string.IsNullOrEmpty(_snapshotDirectory))
+            await RunSnapshotTourAsync(_snapshotDirectory);
     }
 
     /// <summary>
-    /// 启动耗时测量（P0 Spike B）：设置环境变量 FCP_MEASURE_STARTUP=&lt;文件路径&gt; 时，
-    /// 首帧渲染后把“进程启动 → 首帧”的毫秒数追加到该文件，然后退出。
+    /// 截图模式（FCP_SNAPSHOT_DIR）：依次打开各个页面，用 RenderTargetBitmap 直接渲染界面并保存为 PNG。
+    /// 不截取屏幕，因此不受其他窗口遮挡影响，也不会拍到用户屏幕上的其他内容。
     /// </summary>
-    private void OnContentRendered(object? sender, EventArgs e)
+    private async Task RunSnapshotTourAsync(string directory)
     {
-        var measureFile = Environment.GetEnvironmentVariable("FCP_MEASURE_STARTUP");
-        if (string.IsNullOrEmpty(measureFile))
-            return;
-        var elapsed = DateTime.Now - Process.GetCurrentProcess().StartTime;
-        File.AppendAllText(measureFile, $"{elapsed.TotalMilliseconds:F0}{Environment.NewLine}");
+        Directory.CreateDirectory(directory);
+        var settle = TimeSpan.FromMilliseconds(1000);
+
+        await Task.Delay(settle);
+        SaveSnapshot(directory, "01-launch");
+
+        _shell.Launch.OpenInstanceSelectCommand.Execute(null);
+        await Task.Delay(settle);
+        SaveSnapshot(directory, "02-instance-select");
+        _shell.BackCommand.Execute(null);
+
+        _shell.SelectedTab = MainTab.Settings;
+        await Task.Delay(settle);
+        SaveSnapshot(directory, "03-settings");
+
+        _shell.SelectedTab = MainTab.Launch;
+        await Task.Delay(TimeSpan.FromMilliseconds(600));
+        _shell.Launch.LaunchCommand.Execute(null);
+        await Task.Delay(TimeSpan.FromMilliseconds(1100));
+        SaveSnapshot(directory, "04-launching");
+        await Task.Delay(TimeSpan.FromMilliseconds(1900));
+        SaveSnapshot(directory, "05-launched");
+
+        _shell.SelectedTab = MainTab.More;
+        await Task.Delay(settle);
+        SaveSnapshot(directory, "06-placeholder");
+
         Application.Current.Shutdown();
+    }
+
+    private void SaveSnapshot(string directory, string name)
+    {
+        var dpi = VisualTreeHelper.GetDpi(Root);
+        var bitmap = new RenderTargetBitmap(
+            (int)Math.Ceiling(Root.ActualWidth * dpi.DpiScaleX),
+            (int)Math.Ceiling(Root.ActualHeight * dpi.DpiScaleY),
+            dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+        bitmap.Render(Root);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using var stream = File.Create(Path.Combine(directory, name + ".png"));
+        encoder.Save(stream);
     }
 
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

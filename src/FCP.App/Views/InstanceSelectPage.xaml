@@ -1,16 +1,17 @@
 <UserControl x:Class="FCP.App.Views.InstanceSelectPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:FCP.UI.Controls;assembly=FCP.UI"
              xmlns:vm="clr-namespace:FCP.App.ViewModels">
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="230" />
+      <ColumnDefinition Width="250" />
       <ColumnDefinition />
     </Grid.ColumnDefinitions>
 
     <!-- ===== 左栏：游戏文件夹 / 添加或导入 ===== -->
-    <Border Background="{StaticResource Brush.Sidebar}">
-      <StackPanel>
+    <Border Background="{StaticResource Brush.Sidebar}" BorderBrush="#80FFFFFF" BorderThickness="0,0,1,0">
+      <StackPanel Margin="0,4,0,0">
         <TextBlock Text="游戏文件夹" Style="{StaticResource Fcp.Text.Section}" />
         <ItemsControl ItemsSource="{Binding Folders}">
           <ItemsControl.ItemTemplate>
@@ -18,26 +19,37 @@
               <RadioButton Style="{StaticResource Fcp.ListItem}" GroupName="Folders" Tag="{StaticResource Icon.Folder}"
                            Command="{Binding DataContext.SelectFolderCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                            CommandParameter="{Binding}" ToolTip="{Binding Path}" Loaded="FolderItem_Loaded">
-                <StackPanel>
-                  <TextBlock Text="{Binding Name}" />
-                  <TextBlock Text="{Binding Path}" Style="{StaticResource Fcp.Text.Caption}" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
-                </StackPanel>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Path}" Style="{StaticResource Fcp.Text.Caption}" FontWeight="Normal" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                  </StackPanel>
+                  <ui:Chip Grid.Column="1" Content="{Binding Source}" Tone="Brand" Margin="6,0,0,0" />
+                </Grid>
               </RadioButton>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
 
         <TextBlock Text="添加或导入" Style="{StaticResource Fcp.Text.Section}" />
-        <Button Style="{StaticResource Fcp.RowButton}" Margin="6,1" Padding="12,9" Command="{Binding AddFolderCommand}">
+        <Button Style="{StaticResource Fcp.RowButton}" Margin="8,2" Padding="10,8" Command="{Binding AddFolderCommand}">
           <StackPanel Orientation="Horizontal">
-            <Path Data="{StaticResource Icon.AddCircle}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.TextSecondary}" Margin="0,0,10,0" />
-            <TextBlock Text="添加已有文件夹" />
+            <Border Style="{StaticResource Fcp.IconTile}" Width="28" Height="28">
+              <Path Data="{StaticResource Icon.AddCircle}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Fill="{StaticResource Brush.Brand}" />
+            </Border>
+            <TextBlock Text="添加已有文件夹" VerticalAlignment="Center" Margin="10,0,0,0" />
           </StackPanel>
         </Button>
-        <Button Style="{StaticResource Fcp.RowButton}" Margin="6,1" Padding="12,9" Command="{Binding AddFolderCommand}">
+        <Button Style="{StaticResource Fcp.RowButton}" Margin="8,2" Padding="10,8" Command="{Binding AddFolderCommand}">
           <StackPanel Orientation="Horizontal">
-            <Path Data="{StaticResource Icon.Search}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.TextSecondary}" Margin="0,0,10,0" />
-            <TextBlock Text="找不到游戏？全盘查找" />
+            <Border Style="{StaticResource Fcp.IconTile}" Width="28" Height="28" Background="{StaticResource Brush.SkySoft}">
+              <Path Data="{StaticResource Icon.Search}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Fill="{StaticResource Brush.Sky}" />
+            </Border>
+            <TextBlock Text="找不到游戏？全盘查找" VerticalAlignment="Center" Margin="10,0,0,0" />
           </StackPanel>
         </Button>
       </StackPanel>
@@ -49,14 +61,21 @@
         <RowDefinition Height="Auto" />
         <RowDefinition />
       </Grid.RowDefinitions>
-      <TextBox Style="{StaticResource Fcp.SearchBox}" Tag="搜索版本" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
-        <ItemsControl ItemsSource="{Binding Groups}" Margin="0,0,0,20">
+      <TextBox Style="{StaticResource Fcp.SearchBox}" Tag="搜索版本名称、版本号或加载器" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+               ui:Motion.Entrance="True" />
+      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,14,0,0">
+        <ItemsControl ItemsSource="{Binding Groups}" Margin="0,0,4,20">
           <ItemsControl.ItemTemplate>
             <DataTemplate DataType="{x:Type vm:InstanceGroup}">
-              <Border Style="{StaticResource Fcp.Card}" Margin="0,0,0,12" Padding="10,12">
+              <Border Style="{StaticResource Fcp.Card}" Margin="0,0,0,14" Padding="10,12,10,8" ui:Motion.Entrance="True" ui:Motion.Delay="80">
                 <StackPanel>
-                  <TextBlock Text="{Binding Title}" Style="{StaticResource Fcp.Text.CardTitle}" Margin="8,0,0,6" />
+                  <StackPanel Orientation="Horizontal" Margin="8,0,0,8">
+                    <Border Style="{StaticResource Fcp.IconTile}" Width="26" Height="26">
+                      <Path Data="{Binding Icon, Converter={StaticResource ResourceKey}}" Style="{StaticResource Fcp.Icon}" Width="14" Height="14" Fill="{StaticResource Brush.Brand}" />
+                    </Border>
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="9,0,8,0" />
+                    <ui:Chip Content="{Binding CountText}" Tone="Gray" />
+                  </StackPanel>
                   <ItemsControl ItemsSource="{Binding Items}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate DataType="{x:Type vm:InstanceSummary}">
@@ -69,16 +88,34 @@
                               <ColumnDefinition />
                               <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Border Width="32" Height="32" CornerRadius="6" Background="{StaticResource Brush.BrandSoft}">
-                              <Path Data="{StaticResource Icon.Box}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
-                            </Border>
+                            <ui:BlockIcon Kind="{Binding Kind}" Width="36" Height="36" />
                             <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
-                              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                              <TextBlock Text="{Binding Info}" Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0" />
+                              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="{StaticResource FontSize.Subtitle}" TextTrimming="CharacterEllipsis" />
+                              <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                <ui:Chip Content="{Binding McVersion}" Tone="Sky" Margin="0,0,5,0" />
+                                <ui:Chip x:Name="LoaderChip" Content="{Binding Loader}" Tone="Amber" Margin="0,0,5,0" />
+                                <ui:Chip x:Name="AccountChip" Content="{Binding Account}" Tone="Purple" Margin="0,0,8,0" />
+                                <TextBlock Style="{StaticResource Fcp.Text.Caption}" VerticalAlignment="Center">
+                                  <Run Text="上次游玩 " /><Run Text="{Binding LastPlayed, Mode=OneWay}" />
+                                </TextBlock>
+                              </StackPanel>
                             </StackPanel>
-                            <Path Grid.Column="2" Data="{StaticResource Icon.Star}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.TextTertiary}" ToolTip="收藏" />
+                            <Path x:Name="Star" Grid.Column="2" Data="{StaticResource Icon.Star}" Style="{StaticResource Fcp.Icon}" Width="18" Height="18"
+                                  Fill="{StaticResource Brush.TextTertiary}" ToolTip="收藏" Margin="0,0,6,0" />
                           </Grid>
                         </Button>
+                        <DataTemplate.Triggers>
+                          <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                            <Setter TargetName="Star" Property="Data" Value="{StaticResource Icon.StarFilled}" />
+                            <Setter TargetName="Star" Property="Fill" Value="{StaticResource Brush.Amber}" />
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding Loader}" Value="{x:Null}">
+                            <Setter TargetName="LoaderChip" Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding Account}" Value="{x:Null}">
+                            <Setter TargetName="AccountChip" Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                        </DataTemplate.Triggers>
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>

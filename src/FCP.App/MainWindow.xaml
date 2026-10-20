@@ -3,28 +3,67 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="clr-namespace:FCP.UI.Controls;assembly=FCP.UI"
         xmlns:vm="clr-namespace:FCP.App.ViewModels"
-        Title="FCP" Width="900" Height="560" MinWidth="810" MinHeight="470"
+        Title="FCP" Width="920" Height="580" MinWidth="810" MinHeight="470"
         WindowStyle="None" ResizeMode="CanResize" WindowStartupLocation="CenterScreen"
         Background="{StaticResource Brush.WindowBackground}"
         FontFamily="{StaticResource Font.Ui}" FontSize="{StaticResource FontSize.Body}"
         Foreground="{StaticResource Brush.TextPrimary}"
         UseLayoutRounding="True" TextOptions.TextFormattingMode="Display">
   <WindowChrome.WindowChrome>
-    <WindowChrome CaptionHeight="48" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+    <WindowChrome CaptionHeight="52" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
   </WindowChrome.WindowChrome>
 
-  <Grid x:Name="Root">
+  <Window.Resources>
+    <!-- 极淡的像素网格纹理 -->
+    <DrawingBrush x:Key="PixelGrid" TileMode="Tile" Viewport="0,0,22,22" ViewportUnits="Absolute" Viewbox="0,0,22,22" ViewboxUnits="Absolute">
+      <DrawingBrush.Drawing>
+        <GeometryDrawing Brush="#0D0E3B24" Geometry="M0,0 H3 V3 H0 Z" />
+      </DrawingBrush.Drawing>
+    </DrawingBrush>
+    <DrawingBrush x:Key="PixelGridLight" TileMode="Tile" Viewport="0,0,14,14" ViewportUnits="Absolute" Viewbox="0,0,14,14" ViewboxUnits="Absolute">
+      <DrawingBrush.Drawing>
+        <GeometryDrawing Brush="#14FFFFFF" Geometry="M0,0 H2 V2 H0 Z" />
+      </DrawingBrush.Drawing>
+    </DrawingBrush>
+  </Window.Resources>
+
+  <Grid x:Name="Root" Background="{StaticResource Brush.WindowBackground}">
     <Grid.RowDefinitions>
-      <RowDefinition Height="48" />
+      <RowDefinition Height="52" />
       <RowDefinition />
     </Grid.RowDefinitions>
 
+    <!-- ===== 背景装饰：柔和的彩色光斑 + 像素网格 ===== -->
+    <Canvas Grid.Row="1" IsHitTestVisible="False" ClipToBounds="True">
+      <Ellipse Width="560" Height="560" Canvas.Right="-200" Canvas.Top="-240">
+        <Ellipse.Fill>
+          <RadialGradientBrush><GradientStop Color="#4014B8A6" Offset="0" /><GradientStop Color="#0014B8A6" Offset="1" /></RadialGradientBrush>
+        </Ellipse.Fill>
+      </Ellipse>
+      <Ellipse Width="520" Height="520" Canvas.Left="-220" Canvas.Bottom="-260">
+        <Ellipse.Fill>
+          <RadialGradientBrush><GradientStop Color="#3816A34A" Offset="0" /><GradientStop Color="#0016A34A" Offset="1" /></RadialGradientBrush>
+        </Ellipse.Fill>
+      </Ellipse>
+      <Ellipse Width="380" Height="380" Canvas.Right="120" Canvas.Bottom="-230">
+        <Ellipse.Fill>
+          <RadialGradientBrush><GradientStop Color="#33F59E0B" Offset="0" /><GradientStop Color="#00F59E0B" Offset="1" /></RadialGradientBrush>
+        </Ellipse.Fill>
+      </Ellipse>
+    </Canvas>
+    <Rectangle Grid.Row="1" IsHitTestVisible="False" Fill="{StaticResource PixelGrid}" />
+
     <!-- ===== 标题栏 ===== -->
     <Grid Background="{StaticResource Brush.TitleBar}">
+      <Rectangle Fill="{StaticResource PixelGridLight}" IsHitTestVisible="False" />
+      <Border Height="1" VerticalAlignment="Bottom" Background="#26FFFFFF" />
+
       <!-- Logo（暂定） -->
-      <StackPanel x:Name="Logo" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0,0,0" IsHitTestVisible="False">
-        <Path Data="{StaticResource Icon.Box}" Style="{StaticResource Fcp.Icon}" Width="20" Height="20" Fill="White" />
-        <TextBlock Text="FCP" Foreground="White" FontSize="17" FontWeight="SemiBold" Margin="8,0,0,0" VerticalAlignment="Center" />
+      <StackPanel x:Name="Logo" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,0,0,0" IsHitTestVisible="False">
+        <ui:BlockIcon Kind="Vanilla" Width="28" Height="28" />
+        <TextBlock Text="FCP" Foreground="White" FontSize="18" FontWeight="Bold" Margin="9,0,0,1" VerticalAlignment="Center">
+          <TextBlock.Effect><DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.25" Color="#063D22" /></TextBlock.Effect>
+        </TextBlock>
       </StackPanel>
 
       <!-- 主标签：启动 / 下载 / 联机 / 设置 / 更多 -->
@@ -52,7 +91,7 @@
         <Button Style="{StaticResource Fcp.WindowButton}" Command="{Binding BackCommand}" ToolTip="返回 (Esc)">
           <Path Data="{StaticResource Icon.ArrowLeft}" Style="{StaticResource Fcp.Icon}" Fill="White" />
         </Button>
-        <TextBlock Text="{Binding SubPageTitle}" Foreground="White" FontSize="15" VerticalAlignment="Center" Margin="8,0,0,1" />
+        <TextBlock Text="{Binding SubPageTitle}" Foreground="White" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,1" />
       </StackPanel>
 
       <!-- 窗口按钮 -->
@@ -72,16 +111,20 @@
 
     <!-- ===== 提示条（左下角） ===== -->
     <ItemsControl Grid.Row="1" ItemsSource="{Binding Hints}" VerticalAlignment="Bottom" HorizontalAlignment="Left"
-                  Margin="0,0,0,18" IsHitTestVisible="False">
+                  Margin="0,0,0,20" IsHitTestVisible="False">
       <ItemsControl.ItemTemplate>
         <DataTemplate DataType="{x:Type vm:HintItem}">
-          <Border x:Name="Bar" Background="{StaticResource Brush.Info}" CornerRadius="0,16,16,0" Padding="16,7,18,7" Margin="0,4,0,0"
-                  Effect="{StaticResource Shadow.Elevated}">
-            <TextBlock Text="{Binding Text}" Foreground="White" FontSize="{StaticResource FontSize.Body}" />
+          <Border x:Name="Bar" Background="{StaticResource Brush.Info}" CornerRadius="0,18,18,0" Padding="14,8,20,8" Margin="0,5,0,0"
+                  Effect="{StaticResource Shadow.Elevated}" ui:Motion.Entrance="True">
+            <StackPanel Orientation="Horizontal">
+              <Path x:Name="HintIcon" Data="{StaticResource Icon.Info}" Style="{StaticResource Fcp.Icon}" Fill="White" Width="15" Height="15" Margin="0,0,8,0" />
+              <TextBlock Text="{Binding Text}" Foreground="White" FontSize="{StaticResource FontSize.Body}" VerticalAlignment="Center" />
+            </StackPanel>
           </Border>
           <DataTemplate.Triggers>
             <DataTrigger Binding="{Binding Kind}" Value="Success">
-              <Setter TargetName="Bar" Property="Background" Value="{StaticResource Brush.Success}" />
+              <Setter TargetName="Bar" Property="Background" Value="{StaticResource Brush.BrandGradient}" />
+              <Setter TargetName="HintIcon" Property="Data" Value="{StaticResource Icon.Checkmark}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Kind}" Value="Error">
               <Setter TargetName="Bar" Property="Background" Value="{StaticResource Brush.Danger}" />

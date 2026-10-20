@@ -9,4 +9,7 @@
 
   <conv:EnumEqualsConverter x:Key="EnumEquals" />
   <conv:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+  <conv:ResourceKeyConverter x:Key="ResourceKey" />
+  <conv:RatioToStarConverter x:Key="RatioToStar" />
+  <conv:NullToCollapsedConverter x:Key="NullToCollapsed" />
 </ResourceDictionary>

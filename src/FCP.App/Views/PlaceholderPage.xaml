@@ -1,10 +1,26 @@
 <UserControl x:Class="FCP.App.Views.PlaceholderPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <Border Style="{StaticResource Fcp.Card}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="420" Padding="28,22">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:FCP.UI.Controls;assembly=FCP.UI">
+  <Border Style="{StaticResource Fcp.Card}" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="440" Padding="36,30" ui:Motion.Entrance="True">
     <StackPanel>
-      <TextBlock Text="{Binding Title}" FontSize="{StaticResource FontSize.Hero}" Foreground="{StaticResource Brush.Brand}" HorizontalAlignment="Center" />
-      <TextBlock Text="{Binding Description}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,12,0,0" Foreground="{StaticResource Brush.TextSecondary}" />
+      <ui:BlockIcon Kind="{Binding Kind}" Width="72" Height="72" HorizontalAlignment="Center">
+        <ui:BlockIcon.RenderTransform><TranslateTransform /></ui:BlockIcon.RenderTransform>
+        <ui:BlockIcon.Triggers>
+          <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+              <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Y" From="0" To="-8" Duration="0:0:1.2">
+                  <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut" /></DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+              </Storyboard>
+            </BeginStoryboard>
+          </EventTrigger>
+        </ui:BlockIcon.Triggers>
+      </ui:BlockIcon>
+      <TextBlock Text="{Binding Title}" FontSize="{StaticResource FontSize.Hero}" FontWeight="Bold" Foreground="{StaticResource Brush.BrandDeep}" HorizontalAlignment="Center" Margin="0,18,0,0" />
+      <TextBlock Text="{Binding Description}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,10,0,0" Foreground="{StaticResource Brush.TextSecondary}" LineHeight="20" />
+      <ui:Chip Content="即将推出" Tone="Amber" HorizontalAlignment="Center" Margin="0,16,0,0" />
     </StackPanel>
   </Border>
 </UserControl>

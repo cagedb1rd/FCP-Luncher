@@ -1,6 +1,7 @@
 <UserControl x:Class="FCP.App.Views.LaunchPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="clr-namespace:FCP.UI.Controls;assembly=FCP.UI"
              xmlns:vm="clr-namespace:FCP.App.ViewModels">
   <Grid>
     <Grid.ColumnDefinitions>
@@ -8,123 +9,232 @@
       <ColumnDefinition />
     </Grid.ColumnDefinitions>
 
-    <!-- ===== 左栏：账号 → 启动游戏 → 版本选择 / 版本设置（与 PCL 的位置和顺序一致） ===== -->
-    <Border Background="{StaticResource Brush.Sidebar}">
-      <Grid Margin="20,22,20,20">
+    <!-- ===== 左栏：账号 → 当前版本 → 启动游戏 → 版本选择 / 版本设置（与 PCL 的位置和顺序一致） ===== -->
+    <Border Background="{StaticResource Brush.Sidebar}" BorderBrush="#80FFFFFF" BorderThickness="0,0,1,0">
+      <Grid Margin="18,20,18,18">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
           <RowDefinition />
           <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        <!-- 第 0、1 行：账号区；第 2 行：当前版本与启动按钮；启动中时整栏切换为进度面板 -->
 
-        <!-- 账号卡片 -->
-        <Button Style="{StaticResource Fcp.RowButton}" Padding="0" Command="{Binding SwitchAccountCommand}" ToolTip="切换账号">
-          <Border Style="{StaticResource Fcp.Card}" Padding="12">
+        <!-- 账号区：居中的大头像（PCL 用户熟悉的位置），点击切换或添加账号 -->
+        <StackPanel Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,0,10" ui:Motion.Entrance="True"
+                    Visibility="{Binding IsLaunching, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}">
+          <Button Style="{StaticResource Fcp.RowButton}" Padding="0" HorizontalAlignment="Center" Command="{Binding SwitchAccountCommand}" ToolTip="切换或添加账号">
+            <Grid Width="150" Height="150">
+              <!-- 柔和的光晕 -->
+              <Ellipse>
+                <Ellipse.Fill>
+                  <RadialGradientBrush>
+                    <GradientStop Color="#5516A34A" Offset="0" />
+                    <GradientStop Color="#2214B8A6" Offset="0.55" />
+                    <GradientStop Color="#0014B8A6" Offset="1" />
+                  </RadialGradientBrush>
+                </Ellipse.Fill>
+              </Ellipse>
+              <Border CornerRadius="18" Background="White" Padding="5" HorizontalAlignment="Center" VerticalAlignment="Center" Effect="{StaticResource Shadow.Elevated}">
+                <ui:PixelAvatar PlayerName="{Binding PlayerName}" Width="88" Height="88" CornerRadius="13" />
+              </Border>
+            </Grid>
+          </Button>
+          <TextBlock Text="{Binding PlayerName}" FontSize="21" FontWeight="Bold" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+            <ui:Chip Content="{Binding AccountType}" Tone="Gray" />
+            <Button Style="{StaticResource Fcp.RowButton}" Padding="8,3" Margin="6,0,0,0" Command="{Binding SwitchAccountCommand}">
+              <StackPanel Orientation="Horizontal">
+                <Path Data="{StaticResource Icon.ArrowSwap}" Style="{StaticResource Fcp.Icon}" Width="13" Height="13" Fill="{StaticResource Brush.Brand}" />
+                <TextBlock Text="切换账号" FontSize="{StaticResource FontSize.Caption}" Foreground="{StaticResource Brush.BrandDeep}" Margin="5,0,0,0" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- 正常状态：当前版本 + 启动按钮 + 次级按钮 -->
+        <StackPanel Grid.Row="2" Visibility="{Binding IsLaunching, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}">
+          <Border Style="{StaticResource Fcp.Card}" Padding="12,10" Margin="0,0,0,12" ui:Motion.Entrance="True" ui:Motion.Delay="80">
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <Border Width="44" Height="44" CornerRadius="6" Background="{StaticResource Brush.BrandSoft}">
-                <Path Data="{StaticResource Icon.Person}" Style="{StaticResource Fcp.Icon}" Width="22" Height="22" Fill="{StaticResource Brush.Brand}" />
-              </Border>
+              <ui:BlockIcon Kind="{Binding SelectedInstance.Kind}" Width="38" Height="38" />
               <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="{Binding PlayerName}" Style="{StaticResource Fcp.Text.CardTitle}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Text="{Binding AccountType}" Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,0,0" />
+                <TextBlock Text="当前版本" Style="{StaticResource Fcp.Text.Caption}" />
+                <WrapPanel Margin="0,5,0,0">
+                  <ui:Chip Content="{Binding SelectedInstance.McVersion}" Tone="Sky" Margin="0,0,5,0" />
+                  <ui:Chip Content="{Binding SelectedInstance.Loader}" Tone="Amber" Margin="0,0,5,0" Visibility="{Binding SelectedInstance.Loader, Converter={StaticResource NullToCollapsed}}" />
+                  <ui:Chip Content="{Binding SelectedInstance.ModCountText}" Tone="Purple" />
+                </WrapPanel>
               </StackPanel>
-              <Path Grid.Column="2" Data="{StaticResource Icon.ChevronRight}" Style="{StaticResource Fcp.Icon}" Width="12" Height="12" Fill="{StaticResource Brush.TextTertiary}" />
             </Grid>
           </Border>
-        </Button>
-
-        <!-- 正常状态：启动按钮 + 次级按钮 -->
-        <StackPanel Grid.Row="2" Visibility="{Binding IsLaunching, Converter={StaticResource BoolToVisibility}, ConverterParameter=Invert}">
           <Button Style="{StaticResource Fcp.LaunchButton}" Content="启动游戏" Tag="{Binding SelectedInstance.Name}"
-                  Command="{Binding LaunchCommand}" ToolTip="启动游戏 (Ctrl+Enter)" />
-          <Grid Margin="0,10,0,0">
+                  Command="{Binding LaunchCommand}" ToolTip="启动游戏 (Ctrl+Enter)" ui:Motion.Entrance="True" ui:Motion.Delay="140" />
+          <Grid Margin="0,12,0,0" ui:Motion.Entrance="True" ui:Motion.Delay="200">
             <Grid.ColumnDefinitions>
               <ColumnDefinition />
               <ColumnDefinition Width="10" />
               <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Button Style="{StaticResource Fcp.Button}" Content="版本选择" Command="{Binding OpenInstanceSelectCommand}" />
-            <Button Grid.Column="2" Style="{StaticResource Fcp.Button}" Content="版本设置" Command="{Binding OpenInstanceSettingsCommand}" />
+            <Button Style="{StaticResource Fcp.Button}" Content="版本选择" Tag="{StaticResource Icon.Box}" Command="{Binding OpenInstanceSelectCommand}" />
+            <Button Grid.Column="2" Style="{StaticResource Fcp.Button}" Content="版本设置" Tag="{StaticResource Icon.Settings}" Command="{Binding OpenInstanceSettingsCommand}" />
           </Grid>
         </StackPanel>
 
-        <!-- 启动中：进度面板 -->
-        <StackPanel Grid.Row="1" Grid.RowSpan="2" VerticalAlignment="Center"
+        <!-- 启动中：浮动的方块 + 进度面板 -->
+        <StackPanel Grid.RowSpan="3" VerticalAlignment="Center"
                     Visibility="{Binding IsLaunching, Converter={StaticResource BoolToVisibility}}">
-          <TextBlock Text="正在启动游戏" HorizontalAlignment="Center" FontSize="{StaticResource FontSize.Hero}" Foreground="{StaticResource Brush.Brand}" />
+          <ui:BlockIcon Kind="{Binding SelectedInstance.Kind}" Width="64" Height="64" HorizontalAlignment="Center">
+            <ui:BlockIcon.RenderTransform><TranslateTransform /></ui:BlockIcon.RenderTransform>
+            <ui:BlockIcon.Triggers>
+              <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                  <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Y" From="0" To="-10" Duration="0:0:0.6">
+                      <DoubleAnimation.EasingFunction><SineEase EasingMode="EaseInOut" /></DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                  </Storyboard>
+                </BeginStoryboard>
+              </EventTrigger>
+            </ui:BlockIcon.Triggers>
+          </ui:BlockIcon>
+          <TextBlock Text="正在启动游戏" HorizontalAlignment="Center" FontSize="{StaticResource FontSize.Hero}" FontWeight="Bold" Foreground="{StaticResource Brush.BrandDeep}" Margin="0,18,0,0" />
           <TextBlock Text="{Binding SelectedInstance.Name}" HorizontalAlignment="Center" Margin="0,6,0,0" Foreground="{StaticResource Brush.TextSecondary}" TextTrimming="CharacterEllipsis" />
-          <ProgressBar Style="{StaticResource Fcp.ProgressBar}" Value="{Binding LaunchProgress, Mode=OneWay}" Maximum="100" Margin="10,18,10,14" />
-          <Grid HorizontalAlignment="Center">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto" />
-              <ColumnDefinition Width="14" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-              <RowDefinition />
-              <RowDefinition />
-              <RowDefinition />
-            </Grid.RowDefinitions>
-            <TextBlock Text="当前步骤" Style="{StaticResource Fcp.Text.Caption}" HorizontalAlignment="Right" />
-            <TextBlock Grid.Column="2" Text="{Binding LaunchStage}" FontSize="{StaticResource FontSize.Caption}" />
-            <TextBlock Grid.Row="1" Text="账号" Style="{StaticResource Fcp.Text.Caption}" HorizontalAlignment="Right" Margin="0,5,0,0" />
-            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding PlayerName}" FontSize="{StaticResource FontSize.Caption}" Margin="0,5,0,0" />
-            <TextBlock Grid.Row="2" Text="启动进度" Style="{StaticResource Fcp.Text.Caption}" HorizontalAlignment="Right" Margin="0,5,0,0" />
-            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding LaunchProgress, StringFormat={}{0:0} %}" FontSize="{StaticResource FontSize.Caption}" Margin="0,5,0,0" />
-          </Grid>
-          <Button Style="{StaticResource Fcp.Button}" Content="取消" Command="{Binding CancelLaunchCommand}" Margin="40,24,40,0" />
+          <ProgressBar Style="{StaticResource Fcp.ProgressBar}" Value="{Binding LaunchProgress, Mode=OneWay}" Maximum="100" Margin="8,18,8,16" />
+          <Border Style="{StaticResource Fcp.Card}" Padding="14,10" Margin="8,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition />
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+              </Grid.RowDefinitions>
+              <TextBlock Text="当前步骤" Style="{StaticResource Fcp.Text.Caption}" />
+              <TextBlock Grid.Column="2" Text="{Binding LaunchStage}" FontSize="{StaticResource FontSize.Caption}" FontWeight="SemiBold" />
+              <TextBlock Grid.Row="1" Text="账号" Style="{StaticResource Fcp.Text.Caption}" Margin="0,6,0,0" />
+              <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding PlayerName}" FontSize="{StaticResource FontSize.Caption}" Margin="0,6,0,0" />
+              <TextBlock Grid.Row="2" Text="启动进度" Style="{StaticResource Fcp.Text.Caption}" Margin="0,6,0,0" />
+              <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding LaunchProgress, StringFormat={}{0:0} %}" FontSize="{StaticResource FontSize.Caption}" FontWeight="SemiBold" Foreground="{StaticResource Brush.Brand}" Margin="0,6,0,0" />
+            </Grid>
+          </Border>
+          <Button Style="{StaticResource Fcp.Button}" Content="取消" Tag="{StaticResource Icon.Dismiss}" Command="{Binding CancelLaunchCommand}" Margin="50,18,50,0" />
         </StackPanel>
       </Grid>
     </Border>
 
     <!-- ===== 右栏：主页 ===== -->
     <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-      <StackPanel Margin="24,22,24,24">
-        <Border Style="{StaticResource Fcp.Card}">
-          <StackPanel>
-            <TextBlock Text="继续游玩" Style="{StaticResource Fcp.Text.CardTitle}" Margin="2,0,0,8" />
-            <ItemsControl ItemsSource="{Binding Recent}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type vm:InstanceSummary}">
-                  <Button Style="{StaticResource Fcp.RowButton}"
-                          Command="{Binding DataContext.LaunchRecentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                          CommandParameter="{Binding}" ToolTip="直接启动">
-                    <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="Auto" />
-                      </Grid.ColumnDefinitions>
-                      <Border Width="32" Height="32" CornerRadius="6" Background="{StaticResource Brush.BrandSoft}">
-                        <Path Data="{StaticResource Icon.Box}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
-                      </Border>
-                      <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Style="{StaticResource Fcp.Text.Caption}" Margin="0,2,0,0">
-                          <Run Text="{Binding Info, Mode=OneWay}" /><Run Text=" · 上次 " /><Run Text="{Binding LastPlayed, Mode=OneWay}" />
-                        </TextBlock>
-                      </StackPanel>
-                      <Path Grid.Column="2" Data="{StaticResource Icon.Play}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
-                    </Grid>
-                  </Button>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
+      <StackPanel Margin="22,20,22,24">
+        <!-- 问候横幅：像素风景 -->
+        <Grid Height="150" ui:Motion.Entrance="True">
+          <Border CornerRadius="12" Effect="{StaticResource Shadow.Card}" Background="#7CC6F2">
+            <ui:PixelLandscape PixelSize="5" Seed="11" CornerRadius="12" />
+          </Border>
+          <Border CornerRadius="12">
+            <Border.Background>
+              <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#B3FFFFFF" Offset="0" />
+                <GradientStop Color="#40FFFFFF" Offset="0.45" />
+                <GradientStop Color="#00FFFFFF" Offset="0.7" />
+              </LinearGradientBrush>
+            </Border.Background>
+          </Border>
+          <StackPanel Margin="22,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+            <TextBlock Style="{StaticResource Fcp.Text.Display}">
+              <Run Text="{Binding Greeting, Mode=OneWay}" /><Run Text="，" /><Run Text="{Binding PlayerName, Mode=OneWay}" />
+            </TextBlock>
+            <TextBlock Text="今天想玩点什么？" FontSize="{StaticResource FontSize.Subtitle}" Foreground="{StaticResource Brush.TextSecondary}" Margin="2,6,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+              <Border Background="#E6FFFFFF" CornerRadius="12" Padding="10,4" Effect="{StaticResource Shadow.Pill}">
+                <StackPanel Orientation="Horizontal">
+                  <Path Data="{StaticResource Icon.Games}" Style="{StaticResource Fcp.Icon}" Width="14" Height="14" Fill="{StaticResource Brush.Brand}" Margin="0,0,6,0" />
+                  <TextBlock Text="{Binding StatsText}" FontSize="{StaticResource FontSize.Caption}" FontWeight="SemiBold" Foreground="{StaticResource Brush.BrandDeep}" />
+                </StackPanel>
+              </Border>
+            </StackPanel>
           </StackPanel>
-        </Border>
+        </Grid>
 
-        <Border Style="{StaticResource Fcp.Card}" Margin="0,14,0,0">
-          <StackPanel>
-            <TextBlock Text="已接管你在 PCL 中的游戏" Style="{StaticResource Fcp.Text.CardTitle}" />
-            <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" Foreground="{StaticResource Brush.TextSecondary}" LineHeight="20"
-                       Text="找到 2 个游戏文件夹、2 个版本，版本设置已沿用。这两个版本使用 LittleSkin 登录，登录后选择原来的角色即可继续存档进度。（原型示例数据）" />
-          </StackPanel>
-        </Border>
+        <!-- 继续游玩 -->
+        <StackPanel Orientation="Horizontal" Margin="2,20,0,10" ui:Motion.Entrance="True" ui:Motion.Delay="60">
+          <Path Data="{StaticResource Icon.Clock}" Style="{StaticResource Fcp.Icon}" Width="15" Height="15" Fill="{StaticResource Brush.Brand}" />
+          <TextBlock Text="继续游玩" Style="{StaticResource Fcp.Text.CardTitle}" Margin="7,0,0,0" />
+        </StackPanel>
+        <ItemsControl ItemsSource="{Binding Recent}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type vm:InstanceSummary}">
+              <Button Style="{StaticResource Fcp.CardButton}" Margin="0,0,10,10"
+                      Command="{Binding DataContext.LaunchRecentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                      CommandParameter="{Binding}" ToolTip="直接启动" ui:Motion.Entrance="True" ui:Motion.Delay="120">
+                <StackPanel>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:BlockIcon Kind="{Binding Kind}" Width="40" Height="40" />
+                    <StackPanel Grid.Column="1" Margin="11,0,8,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="{StaticResource FontSize.Subtitle}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
+                      <TextBlock Style="{StaticResource Fcp.Text.Caption}" Margin="0,3,0,0">
+                        <Run Text="上次游玩 " /><Run Text="{Binding LastPlayed, Mode=OneWay}" />
+                      </TextBlock>
+                    </StackPanel>
+                    <Border Grid.Column="2" Width="34" Height="34" CornerRadius="17" Background="{StaticResource Brush.BrandGradient}" VerticalAlignment="Center" Effect="{StaticResource Shadow.BrandGlow}">
+                      <Path Data="{StaticResource Icon.Play}" Style="{StaticResource Fcp.Icon}" Width="14" Height="14" Fill="White" Margin="2,0,0,0" />
+                    </Border>
+                  </Grid>
+                  <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <ui:Chip Content="{Binding McVersion}" Tone="Sky" Margin="0,0,5,0" />
+                    <ui:Chip Content="{Binding Loader}" Tone="Amber" Margin="0,0,5,0" Visibility="{Binding Loader, Converter={StaticResource NullToCollapsed}}" />
+                    <ui:Chip Content="{Binding ModCountText}" Tone="Purple" />
+                  </StackPanel>
+                </StackPanel>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- 小贴士 + 迁移状态 -->
+        <Grid Margin="0,4,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition />
+          </Grid.ColumnDefinitions>
+          <Border Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True" ui:Motion.Delay="180">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource Fcp.IconTile}" Background="{StaticResource Brush.AmberSoft}">
+                  <Path Data="{StaticResource Icon.Lightbulb}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Amber}" />
+                </Border>
+                <TextBlock Text="你知道吗" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+              </StackPanel>
+              <TextBlock Text="{Binding Tip}" TextWrapping="Wrap" Foreground="{StaticResource Brush.TextSecondary}" LineHeight="20" Margin="0,10,0,0" />
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="2" Style="{StaticResource Fcp.Card}" ui:Motion.Entrance="True" ui:Motion.Delay="240">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource Fcp.IconTile}">
+                  <Path Data="{StaticResource Icon.Checkmark}" Style="{StaticResource Fcp.Icon}" Fill="{StaticResource Brush.Brand}" />
+                </Border>
+                <TextBlock Text="已接管 PCL 中的游戏" Style="{StaticResource Fcp.Text.CardTitle}" VerticalAlignment="Center" Margin="10,0,0,0" />
+              </StackPanel>
+              <TextBlock TextWrapping="Wrap" Foreground="{StaticResource Brush.TextSecondary}" LineHeight="20" Margin="0,10,0,0"
+                         Text="找到 2 个游戏文件夹、2 个版本，设置已沿用。登录 LittleSkin 并选择原来的角色即可继续存档进度。" />
+            </StackPanel>
+          </Border>
+        </Grid>
       </StackPanel>
     </ScrollViewer>
   </Grid>

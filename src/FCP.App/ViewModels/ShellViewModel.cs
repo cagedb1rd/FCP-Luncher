@@ -38,10 +38,10 @@ public sealed partial class ShellViewModel : ObservableObject
         _tabPages = new Dictionary<MainTab, object>
         {
             [MainTab.Launch] = Launch,
-            [MainTab.Download] = new PlaceholderPageViewModel("下载", "安装新版本和下载资源将在 v0.2 推出。"),
-            [MainTab.Link] = new PlaceholderPageViewModel("联机", "联机功能仍在评估中。"),
+            [MainTab.Download] = new PlaceholderPageViewModel("下载", "安装新版本和下载资源将在 v0.2 推出。", FCP.UI.Controls.BlockKind.Fabric),
+            [MainTab.Link] = new PlaceholderPageViewModel("联机", "联机功能仍在评估中。", FCP.UI.Controls.BlockKind.Quilt),
             [MainTab.Settings] = new SettingsPageViewModel(this),
-            [MainTab.More] = new PlaceholderPageViewModel("更多", "帮助、关于与鸣谢、工具箱和反馈将在后续阶段实现。"),
+            [MainTab.More] = new PlaceholderPageViewModel("更多", "帮助、关于与鸣谢、工具箱和反馈将在后续阶段实现。", FCP.UI.Controls.BlockKind.AprilFools),
         };
         _currentPage = Launch;
     }
@@ -108,4 +108,4 @@ public sealed partial class ShellViewModel : ObservableObject
 }
 
 /// <summary>尚未实现的页面。</summary>
-public sealed record PlaceholderPageViewModel(string Title, string Description);
+public sealed record PlaceholderPageViewModel(string Title, string Description, FCP.UI.Controls.BlockKind Kind = FCP.UI.Controls.BlockKind.Vanilla);
