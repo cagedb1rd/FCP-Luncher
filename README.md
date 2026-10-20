@@ -20,3 +20,9 @@
 
 ## 致谢
 本项目是独立实现的启动器，与 Plain Craft Launcher（PCL）没有隶属关系。迁移功能兼容 PCL 的数据格式。感谢 PCL 及其社区为国内 Minecraft 启动器体验所做的开创性贡献。
+
+## 许可证 / License
+
+本项目以 [MIT 许可证](LICENSE) 开源。第三方组件的许可见 [NOTICE.md](NOTICE.md)。本项目与 PCL 及其作者没有隶属关系；Minecraft 是 Mojang Studios 的商标，本启动器不提供游戏本体下载。
+
+Released under the [MIT License](LICENSE). See [NOTICE.md](NOTICE.md) for third-party licenses. Not affiliated with PCL or Mojang Studios; this launcher does not distribute the Minecraft game.
