@@ -28,6 +28,12 @@ jobs:
       - name: Test
         run: dotnet test --solution FCP.slnx -c Release --no-build
 
+      # 主要用户使用中文系统：再用中文语言环境跑一遍（排序、文字格式等与英文环境不同）
+      - name: Test (zh-CN)
+        run: dotnet test --solution FCP.slnx -c Release --no-build
+        env:
+          FCP_TEST_CULTURE: zh-CN
+
       - name: Publish (self-contained single file)
         run: dotnet publish src/FCP.App -c Release -o artifacts/publish/app
 

@@ -71,7 +71,9 @@ public class InstanceContentTests : IDisposable
         var saves = InstanceContent.ListSaves(_mc.Root);
         saves.Select(s => s.Name).ShouldBe(["生存世界"]);
         saves[0].IconPath.ShouldNotBeNull();
-        InstanceContent.ListPacks(_mc.Root, "resourcepacks").Select(p => (p.Name, p.IsFolder)).ShouldBe([("材质包", false), ("文件夹包", true)]);
+        // 按当前语言排序（中文系统按拼音），期望顺序用同样的规则计算，测试在英文系统（CI）上也成立
+        var expected = new[] { ("材质包", false), ("文件夹包", true) }.OrderBy(p => p.Item1, StringComparer.CurrentCultureIgnoreCase);
+        InstanceContent.ListPacks(_mc.Root, "resourcepacks").Select(p => (p.Name, p.IsFolder)).ShouldBe(expected);
         InstanceContent.ListPacks(_mc.Root, "shaderpacks").Single().Name.ShouldBe("BSL");
         InstanceContent.ListSaves(Path.Combine(_mc.Root, "nothing")).ShouldBeEmpty();
     }
